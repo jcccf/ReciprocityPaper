@@ -1,0 +1,261 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subfig}
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+
+\title{Predicting Reciprocity in Social Networks}
+
+\author{\IEEEauthorblockN{Anonymous}
+\IEEEauthorblockA{Anonymous Department\\
+Anonymous Institution \\
+Anonymous Location \\
+anon@whoare.you}
+\and
+\IEEEauthorblockN{Anonymous}
+\IEEEauthorblockA{Anonymous Department\\
+Anonymous Institution \\
+Anonymous Location \\
+anon@whoare.you}
+\and
+\IEEEauthorblockN{Anonymous}
+\IEEEauthorblockA{Anonymous Department\\
+Anonymous Institution \\
+Anonymous Location \\
+anon@whoare.you}}
+
+% make the title area
+\maketitle
+
+\begin{abstract}
+%\boldmath
+In this paper we investigate methods of predicting reciprocity in social networks, and use machine learning (and regression?) to determine good indicators of reciprocity. Using the Twitter @ message graph, we find that XXX and XXX perform well, while XXX and XXX do not, despite the fact that they are good link prediction heuristics.
+\end{abstract}
+
+% no keywords
+
+% For peer review papers, you can put extra information on the cover
+% page as needed:
+% \ifCLASSOPTIONpeerreview
+% \begin{center} \bfseries EDICS Category: 3-BBND \end{center}
+% \fi
+%
+% For peerreview papers, this IEEEtran command inserts a page break and
+% creates the second title. It will be ignored for other modes.
+\IEEEpeerreviewmaketitle
+
+\section{Introduction}
+Reciprocity prediction and link prediction are inherently different problems - while link prediction is about predicting the occurence of rare events, reciprocity prediction predicts the "balance", or directions of an edge.
+
+\subsection{Related work}
+Tyler and Tang showed that reciprocity 
+http://www.hpl.hp.com/research/idl/papers/rhythms/ECSCWFinal.pdf
+To be written.
+
+\subsection{Twitter as a superposition of networks}
+Twitter is a good domain to explore the superposition of the reciprocated and unreciprocated networks. The reciprocated network consists of mainly mutual interactions between friends or people in the same social circle, while the unreciprocated network consists of interactions between individuals in different social circles. We can also relate these types of interactions to the concept of status - where people with similar status participate in reciprocated interactions (e.g. messages between friends), while those with dissimilar status in unreciprocated interactions (e.g. messages from fans to celebrities).
+
+\subsection{Problem definition}
+The input to our prediction problem is a graph $G=(V,E)$ and a node pair $\{v,w\}$, where $v,w \in V$ but all edges between $v$ and $w$ removed. Our task is to predict the direction of edges between $v$ and $w$.
+
+Reciprocity prediction on this graph can be defined in two ways. In the first, given that at least one edge exists between $v$ and $w$, decide whether both $(v,w)$ and $(w,v)$ exist (bidirected/symmetric), or only one of $(v,w)$, $(w,v)$ exists (asymmetry). In the second, given an edge $(v,w)$, decide whether $(w,v)$ exists.
+
+\subsection{Notation}
+
+We subsequently consider the subgraphs of the form $G_n = (V_n, E_n)$, where $V_n = \{v~|~v \in V, v \text{ sent } \ge n \text{ messages}\}$ and $E_n = \{e=(v,w)~|~e \in E,~v \text{ and } w \in V_n\}$.
+
+Also define \(v \xrightarrow{k} w$, which means $v$ sent $w$ $k$ messages. From this definition we can formalize reciprocity in terms of $k$. We define an edge $(v,w)$ to be reciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and unreciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{0} v$.
+
+Let the set of reciprocated edges be \(E_k^r = \{ (v,w) : v \xrightarrow{k} w \text{ and } w \xrightarrow{k} v \} \), and the set of unreciprocated edges be \(E_k^u = \{ (v,w) : v \xrightarrow{k} w\} \).
+
+Let $\deg^-(v)$ and $\deg^+(v)$ be the indegree and outdegree of node $v$ respectively, $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ be the messages received and sent by a node $v$, and $\Gamma^-(v) = \{w| (w,v) \in E\}$, or the set of people who send messages to $v$.
+
+\section{Dataset description}
+The sample dataset consisted of the directed @ message graph $G=(V,E)$ of the Twitter network from (TIME) to (TIME). 12,795,683 unique users ($|V|$) sent a total of 819,305,776 messages, with 156,868,257 unique directed interactions ($|E|$) taking place between users during this time.
+
+\section{Methods for Reciprocity Prediction}
+This section presents a survey of various methods that can be used in predicting reciprocity in networks. Each method assigns a value $\operatorname{val}(v,w)$ to a node pair $\{v,w\}$. Given values corresponding to all node pairs in question, we can then choose threshold values or ranges where we predict reciprocity, and non-reciprocity in all others.
+
+\subsection{Degree-based prediction methods}
+It seems intuitive that the relative indegree or outdegree of nodes would indicate whether a pair of nodes are in a one-sided or two-sided relationship. If both have a similar indegree, this might indicate that they are at a similar social status in the network. In contrast, a disproportionate indegree would indicate that perhaps one was a celebrity and the other an average Joe, thus it would be unlikely that the relationship between them is reciprocated.
+
+\emph{Indegree and outdegree ratio} both measure the ratio of outdegrees or indegrees of two nodes, and $\operatorname{val}(v,w) = \deg^-(v)/\deg^-(w)$ or $\deg^+(v)/\deg^+(w)$ respectively.
+
+\emph{Inmessage and outmessage ratio} are similar, but instead also take into account the total number of messages that a node receives or sends, rather than the unique nodes that a node sends messages to or receives messages from.
+
+\emph{Incoming message/indegree ratio} compares the ratio of two nodes' incoming message to indegree ratio. (INSERT RATIONALE?)
+
+\emph{Outdegree/indegree ratio} is a heuristic that attempts to characterize the messaging activity of a single node - a celebrity might have high outdegree/indegree ratio because she receive many messages from many followers but herself sends relatively few messages. We then characterize the ratio of the outdegree/indegree ratio of two nodes, or $\operatorname{val}(v,w) = \frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)}$.
+
+\subsection{Link prediction methods}
+It is not intuitive whether methods that work well for link prediction would work well in reciprocity; while link prediction asks whether an edge could exist between two nodes, reciprocity prediction asks whether a known edge is bidirectional.
+
+\emph{Jaccard's coefficient} calculates the similarity between two sets by taking the ratio of the cardinality of their intersection and their union. $\operatorname{val}(v,w) = \frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)|}$.
+
+\emph{Adamic and Adar} \cite{Adamic:2003ud}, defined the similarity between web sites $v,w$ to be $ \sum_{\{x|v,w \text{ share feature }x\}} \frac{1}{\log{\text{frequency}(x)}} $, and we similarly define $\operatorname{val}(v,w)$ to be \[ \sum_{\{x|x \in \Gamma^-(v) \cap \Gamma^-(w)\}} \frac{1}{\log{\deg^-(x)}} .\]
+
+\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. Here, $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^-(w)$.
+
+\emph{Katz} \cite{Katz:1953un} also developed a measure of status by calculating the number of paths between two nodes. In this study, we only consider paths of up to length 2, and $\operatorname{val}(v,w) = \sum_{i=1}^2 \beta^i|\operatorname{paths}^i(v,w)|$, where $\beta$ is an arbitary damping constant, and $\operatorname{paths}^i(v,w)$ is the set of paths from $v$ to $w$ of length $i$.
+
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.3}
+\caption{Reciprocity Prediction Methods}
+\label{table_recmethods}
+\centering
+\begin{tabular}{|c||c|}
+\hline
+\bf{Method} & $\mathbf{val}(v,w)$\\
+\hline
+Indegree ratio & $\deg^-(v) / \deg^-(w)$ \\
+Outdegree ratio & $\deg^+(v) / \deg^+(w)$ \\
+\hline
+Incoming message ratio & $\operatorname{msg}^-(v) / \operatorname{msg}^-(w)$ \\
+Outgoing message ratio & $\operatorname{msg}^+(v) / \operatorname{msg}^+(w)$ \\
+\hline
+Incoming message-indegree ratio & $\frac{\operatorname{msg}^-(v)}{\deg^-(v)} / \frac{\operatorname{msg}^-(w)}{\deg^-(w)}$ \\
+Outgoing message-indegree ratio & $\frac{\operatorname{msg}^+(v)}{\deg^+(v)} / \frac{\operatorname{msg}^+(w)}{\deg^+(w)}$ \\
+\hline
+Outdegree-indegree ratio & $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} $ \\
+\hline
+Jaccard's coefficient & $\frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)}$ \\
+\hline
+Adamic/Adar & $\sum_{\{x|x \in \Gamma^-(v) \cap \Gamma^-(w)\}} \frac{1}{\log{\deg^-(x)}}$ \\
+\hline
+Preferential Attachment & $\deg^-(v)\cdot \deg^-(w)$ \\
+\hline
+Katz & $\sum_{i=1}^2 \beta^i|\operatorname{paths}^i(v,w)|$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Results and Discussion}
+
+\subsection{Individual properties}
+To calculate the accuracy of the individual heuristics, we calculated the values obtained for each method on a subset of $E_{10}^r \cup E_{10}^u$, where equal numbers of edges were taken from the two sets of reciprocated and unreciprocated edges. The baseline accuracy is 0.500, since you would achieve this by simply predicting that all edges were of one type.
+
+We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy, where we would predict reciprocity above the threshold, and non-reciprocity otherwise. Table \ref{table_recresults_indiv} summarizes the performance of each heuristic on the subgraph $G_{1000}, k=10$.
+
+(INCLUDE a graph for one/all of the properties)
+
+Surprisingly, preferential attachment does badly, even though...
+
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.3}
+\caption{Reciprocity Prediction Method Performance: Individual}
+\label{table_recresults_indiv}
+\centering
+\begin{tabular}{|c||c|c|}
+\hline
+\bf{Method} & $\mathbf{val}_{OPT}$ (Percentile) & \bf{Accuracy} \\
+\hline
+Indegree ratio & & \\
+Outdegree ratio & & \\
+\hline
+Incoming message ratio & & \\
+Outgoing message ratio & & \\
+\hline
+Incoming message-indegree ratio & & \\
+\hline
+Outdegree-indegree ratio & 0.498 (45) & 0.768 \\
+\hline
+Jaccard's coefficient & & \\
+\hline
+Adamic/Adar & 0.48 (??) & 0.574 \\
+\hline
+Preferential Attachment & - (-) & 0.500 \\
+\hline
+Katz & ?? (52) & 0.760 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Decision tree analysis}
+(TODO) We were also interested in how well these methods fare in comparison, and also wanted to know if we could achieve higher accuracy in reciprocity prediction if we combined these heuristics. Our results indicate that the Katz measure was the most important, followed by outdegree-indegree ratio. 
+
+(Old) Just using degree-based heuristics, get accuracy of 0.825. 
+With all heuristics (with skewed Katz), 0.878
+
+\section{(Un)reciprocated subgraph analysis}
+We also analyzed how various properties of the subgraphs $G_n$, as well as the edge sets $E^r_k$ and $E^u_k$ varied as we adjusted $n$ and $k$.
+
+\paragraph{Reciprocated and unreciprocated edges} we notice that the frequency of reciprocated edges is approximately 2 to 3 times that of unreciprocated edges, and the proportion of reciprocated edges increases as $n$ and $k$ increases (Fig. \ref{fig_rur_propne}). While reciprocated communication is the dominant form of interaction, we see a significant number of "unreciprocated" interaction, indicating that a significant number of relationships on Twitter are unbalanced. This could occur when a user of lower status tries to get the attention of a more influential user (of higher status) by messaging him or her (e.g. when a fan messages a celebrity multiple times hoping to get a reply). 
+
+\paragraph{Reciprocated and unreciprocated nodes} a majority of nodes have reciprocated relationships, with a small proportion having only unreciprocated relationships. A significant proportion of nodes take part in both reciprocated and unreciprocated relationships - indicating that while there are two distinct types of relationships occuring on Twitter, this does not correspond to two distinct types of users. A reason that "unreciprocated" Twitter users are not common might be that social, and hence reciprocated relationships are the driving factor of active, continued use of the platform. 
+
+We can also see this in Fig. \ref{fig_rur_sca2}, a scatter plot of the number of users with each of 3 types of interaction - 1 reciprocated and 2 unreciprocated, as an unreciprocated interaction is by definition asymmetric. We differentiate between both ends in an unreciprocated edge ($v \xrightarrow{k} w$ and $w \xrightarrow{0} v$), where where a user could be $v$ if she's not replied to, or $w$ if she doesn't reply. The most common type of nodes are those which only have reciprocated edges, with a lot less having some unreciprocated interactions of some type.
+
+\paragraph{Clustering coefficient remains relatively stable as $n$, $k$ vary, and the graphs corresponding to $E_k^r$ and $E_k^u$ are connected} this demonstrates that the network properties of these subgraphs do not change significantly even if we sample from a relatively smaller population of all users (Fig. \ref{fig_rur_cc},\ref{fig_rur_lcc}).
+
+\begin{figure}[!t]
+\centering
+\subfloat[Varying $n$]{\includegraphics[width=1.5in]{proportion_edgesnodes_n}}                
+\subfloat[Varying $k$]{\includegraphics[width=1.5in]{proportion_edgesnodes_k}}
+\caption{Proportion of nodes or edges}
+\label{fig_rur_propne}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\subfloat[Varying $n$]{\includegraphics[width=1.5in]{average_clustering_n}}                
+\subfloat[Varying $k$]{\includegraphics[width=1.5in]{average_clustering_k}}
+\caption{Clustering coefficient}
+\label{fig_rur_cc}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\subfloat[Varying $n$]{\includegraphics[width=1.5in]{proportion_largestcc_n}}                
+\subfloat[Varying $k$]{\includegraphics[width=1.5in]{proportion_largestcc_k}}
+\caption{Proportion in largest connected component}
+\label{fig_rur_lcc}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=2.5in]{scatter3}
+\caption{Scatter plot of users' interaction types}
+\label{fig_rur_sca2}
+\end{figure}
+
+% An example of a double column floating figure using two subfigures.
+% (The subfig.sty package must be loaded for this to work.)
+% The subfigure \label commands are set within each subfloat command, the
+% \label for the overall figure must come after \caption.
+% \hfil must be used as a separator to get equal spacing.
+% The subfigure.sty package works much the same way, except \subfigure is
+% used instead of \subfloat.
+%
+%\begin{figure*}[!t]
+%\centerline{\subfloat[Case I]\includegraphics[width=2.5in]{subfigcase1}%
+%\label{fig_first_case}}
+%\hfil
+%\subfloat[Case II]{\includegraphics[width=2.5in]{subfigcase2}%
+%\label{fig_second_case}}}
+%\caption{Simulation results}
+%\label{fig_sim}
+%\end{figure*}
+%
+% Note that often IEEE papers with subfigures do not employ subfigure
+% captions (using the optional argument to \subfloat), but instead will
+% reference/describe all of them (a), (b), etc., within the main caption.
+
+\section{Conclusion}
+To be written.
+
+
+\section*{Acknowledgment}
+The authors would like to thank Twitter for providing our experimental dataset. This work was supported by (SOMEGRANT).
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{rec}
+
+\end{document}
+
+
