@@ -145,17 +145,22 @@ Outgoing message-indegree ratio & $\frac{\operatorname{msg}^+(v)}{\deg^+(v)} / \
 Outdegree-indegree ratio & $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} $ \\
 \hline
 \hline
-Mutual neighbors & $|\Gamma^-(v) \cap \Gamma^-(w)|$ or $|\Gamma^+(v) \cap \Gamma^+(w)|$ \\
+Mutual neighbors (in) & $|\Gamma^-(v) \cap \Gamma^-(w)|$ \\
+Mutual neighbors (out) & $|\Gamma^+(v) \cap \Gamma^+(w)|$ \\
 \hline
-Jaccard's coefficient & $\frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)}$ or $\frac{|\Gamma^+(v) \cap \Gamma^+(w)|}{|\Gamma^+(v) \cup \Gamma^+(w)}$ \\
+Jaccard's coefficient (in) & $\frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)}$ \\
+Jaccard's coefficient (out) & $\frac{|\Gamma^+(v) \cap \Gamma^+(w)|}{|\Gamma^+(v) \cup \Gamma^+(w)}$ \\
 \hline
 Adamic/Adar & $\sum_{\{x|x \in \Gamma^-(v) \cap \Gamma^-(w)\}} \frac{1}{\log{\deg^-(x)}}$ \\
 \hline
-Preferential Attachment & $\deg^-(v)\cdot \deg^-(w)$ or  $\deg^+(v)\cdot \deg^+(w)$ \\
+Preferential attachment ($v$ to $w$) & $\deg^+(v)\cdot \deg^+(w)$ \\
+Preferential Attachment ($w$ to $v$) & $\deg^-(v)\cdot \deg^-(w)$ \\
 \hline
-2-step paths & $ |\operatorname{paths}^2(v,w)|$ \\
+Two-step paths ($v$ to $w$) & $ |\operatorname{paths}^2(v,w)|$ \\
+Two-step paths ($w$ to $v$) & $ |\operatorname{paths}^2(w,v)|$ \\
 \hline
-2-step paths ratio & $\frac{|\operatorname{paths}^2(v,w)|}{|\operatorname{paths}^2(w,v)|}$ or $\frac{\sum_{i=1}^2 \beta^i|\operatorname{paths}^i(v,w)|}{\sum_{i=1}^2 \beta^i|\operatorname{paths}^i(w,v)|}$ \\
+Two-step paths ratio & $\frac{|\operatorname{paths}^2(v,w)|}{|\operatorname{paths}^2(w,v)|}$ \\
+% $\frac{\sum_{i=1}^2 \beta^i|\operatorname{paths}^i(v,w)|}{\sum_{i=1}^2 \beta^i|\operatorname{paths}^i(w,v)|}$ Did badly
 \hline
 \end{tabular}
 \end{table}
@@ -228,7 +233,7 @@ Adamic/Adar & 1.94 (55) & 0.561 \\
 Two-step paths ($v$ to $w$) & 6 (59) & 0.517* \\
 Two-step paths ($w$ to $v$) & 5 (51) & 0.657 \\
 Two-step paths ratio (directed) & 0.556 (52) & 0.760 \\
-Two-step paths ratio (undirected) &  &  \\
+Two-step paths ratio (undirected) & 0.259 (34) & 0.516 \\
 \hline
 Preferential attachment ($v$ to $w$) & 10230 (58) & 0.687* \\
 Preferential attachment ($w$ to $v$) & 2610 (37) & 0.534* \\
@@ -277,7 +282,7 @@ We considered these 4 subsets of features
 	\item Link prediction features - all other features not mentioned
 \end{enumerate}
 
-We then combined all the features (1-4), as well as considered only "ratio" features (2-4), and evaluated their performance.
+We then combined all the features (1-4), as well as considered only "ratio" features (2-4), and evaluated their performance, by splitting the edges in $E^r_10 \cup E_10^u$ randomly into two sets, training on one and evaluating on the other.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -289,8 +294,8 @@ We then combined all the features (1-4), as well as considered only "ratio" feat
 \bf{Set} & Accuracy & Most Important \\
 \hline
 Degree/message &  & \\
-Degree/message ratio & 0.816 & Outdegree-indegree ratio \\
-2 step paths & 0.795 & Two-step paths ($w$ to $v$)\\
+Degree/message ratio & 0.822 & Outdegree-indegree ratio \\
+2 step paths & 0.795 & Two-step paths ($w$ to $v$) \\
 Link prediction & 0.742 & Two-step paths ratio (directed) \\
 All ratio & 0.822 & Outdegree-indegree ratio \\
 All & & \\
@@ -300,7 +305,7 @@ All & & \\
 
 When we only use degree/message-based features, we obtain a prediction accuracy of 0.816. The most important factor was the outdegree-indegree ratio, and the least important factor the incoming message/indegree and outgoing message/outdegree ratios.
 
-When we use 
+Notice that in the end the accuracy of the decision tree obtained by only using the relatively simpler degree/message features is only marginally worse than that using all features discussed above.
 
 \subsection{Regression analysis}
 We used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$ and $z = \beta_0 + \beta F$, where $f(z)$ is binary and takes the value 1 when an edge is reciprocated, and 0 otherwise. $F$ is the vector of features.
@@ -314,13 +319,62 @@ We used a logistic regression model on subsets of features as well, where $f(z) 
 \hline
 \bf{Feature} & $\mathbf{\beta}$ & $\mathbf{p}$ value \\
 \hline
-Indegree ratio & 0.00815 & $< 2 \e{-16} $ \\
-Outdegree ratio & -0.0002461 & 0.100 \\
-Incoming messages ratio & 0.0139299 & $< 2 \e{-16} $ \\
-Outgoing messages ratio & -0.0040418 & $< 2 \e{-16} $ \\
-Incoming messages-indegree ratio & 0.0003188 & 0.0183 \\
-Outgoing messages-outdegree ratio & 0.0031140 & $< 2 \e{-16} $ \\
-Outdegree-indegree ratio & 0.0404860 & $< 2 \e{-16} $ \\
+Indegree ratio & 0.0082415 & $< 2 \e{-16} $ \\
+Outdegree ratio & -0.0006923 & 3.91 \e{-6} \\
+Incoming messages ratio & 0.0139543 & $< 2 \e{-16} $ \\
+Outgoing messages ratio & -0.0035366 & $< 2 \e{-16} $ \\
+Incoming messages-indegree ratio & 0.0006435 & 2.21 \e{-6} \\
+Outgoing messages-outdegree ratio & 0.0027760 & $< 2 \e{-16} $ \\
+Outdegree-indegree ratio & 0.0434046 & $< 2 \e{-16} $ \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.3}
+\caption{Logistic regression on most features}
+\label{table_recresults_lograll2}
+\centering
+\begin{tabular}{|c||c|c|}
+\hline
+\bf{Feature} & $\mathbf{\beta}$ & $\mathbf{p}$ value \\
+\hline
+Indegree ratio     &    0.0027550  & $< 2 \e{-16} $\\
+Outdegree ratio    &   -0.0025601  & $< 2 \e{-16} $\\
+Incoming messages ratio    &    0.0118058  & $< 2 \e{-16} $\\
+Outgoing messages ratio   &   -0.0027928  & $< 2 \e{-16} $\\
+Incoming messages-indegree ratio      &   0.0006257 &  0.000147 \\
+Outgoing messages-outdegree ratio   &     0.0010365 &  $7.48 \e{-10}$ \\
+Outdegree-indegree ratio  &   0.0224308  & $< 2 \e{-16} $\\
+\hline
+Mutual Neighbors (in) & -0.0206470  &$< 2 \e{-16} $\\
+Mutual Neighbors (out) & 0.0150586  & $< 2 \e{-16} $\\
+Two-step paths ($v$ to $w$)  &  -0.0768816   & $< 2 \e{-16} $\\
+Two-step paths ($w$ to $v$)   &    0.0186746   & $< 2 \e{-16} $\\
+\hline
+Two-step paths (directed)  &   0.0628968 & $< 2 \e{-16} $\\
+Jaccard (in) & -0.0259322 & $< 2 \e{-16} $\\
+Jaccard (out) &   0.0547273  & $< 2 \e{-16} $\\
+Adamic-Adar  &    -0.0030061 & 0.001006 ** \\
+Preferential attachment ($v$ to $w$) &  0.0014906  & $8.86 \e{-7}$ \\
+Preferential attachment ($w$ to $v$)  &  - & -  \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.3}
+\caption{Logistic regression on two-step path features}
+\label{table_recresults_logrpath}
+\centering
+\begin{tabular}{|c||c|c|}
+\hline
+\bf{Feature} & $\mathbf{\beta}$ & $\mathbf{p}$ value \\
+\hline
+Mutual neighbors (in) & -0.0117269 & $< 2 \e{-16} $ \\
+Mutual neighbors (out) & 0.0180579 & $< 2 \e{-16} $ \\
+Two-step paths ($v$ to $w$) & -0.1193624 & $< 2 \e{-16} $ \\
+Two-step paths ($w$ to $v$) & 0.1296081 & $< 2 \e{-16} $ \\
 \hline
 \end{tabular}
 \end{table}
