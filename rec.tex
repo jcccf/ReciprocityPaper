@@ -4,6 +4,8 @@
 \usepackage{graphicx}
 \usepackage{subfig}
 \usepackage{paralist}
+\usepackage{tikz}
+\usepackage[normalem]{ulem}
 
 \providecommand{\e}[1]{\ensuremath{\times 10^{#1}}}
 
@@ -37,7 +39,7 @@ anon@whoare.you}}
 
 \begin{abstract}
 %\boldmath
-In this paper we investigate methods of predicting reciprocity in social networks, and use machine learning (and regression?) to determine good indicators of reciprocity. Using the Twitter @ message graph, we find that XXX and XXX perform well, while XXX and XXX do not, despite the fact that they are good link prediction heuristics.
+In this paper we investigate methods of predicting reciprocity in social networks, and use machine learning and regression to determine good indicators of reciprocity. Using the Twitter @ message graph, we discover that the ratio of a node's outdegree to its indegree is the best predictor of reciprocity, and that heuristics used in link prediction do not necessarily perform well in reciprocity prediction. In fact, using only "degree/message" properties <<rephrase>> is sufficient in obtaining maximum accuracy.
 \end{abstract}
 
 % no keywords
@@ -86,18 +88,20 @@ In $G_{1000}$, $|E^r_{10}| = 797,342$, $|E^u_{10}| = 349,258$.
 \section{Methods for Reciprocity Prediction}
 Intuitively, features and measure whether $v$ and $w$ have similar status or a similar social circle, and each is potentially useful in predicting reciprocation. This section presents a survey of various methods that can be used in predicting reciprocity in networks. Each method assigns a value $\operatorname{val}(v,w)$ to a node pair $\{v,w\}$. Given values corresponding to all node pairs in question, we can then choose threshold values or ranges where we predict reciprocity, and non-reciprocity otherwise.
 
-For each property, we picked a single value $v^\star$ for which we predict every edge with value lower than $v^\star$ is unreciprocated and reciprocated otherwise, or vice versa, to maximize prediction accuracy. Intuitively, we expect that larger values of each property correspond to a stronger indication of reciprocity. For example, a high mutual neighbor count for the nodes $v$ and $w$ could strongly indicate the existence of a reciprocated link between them.
+For each property, we picked a single value $\operatorname{val}_{OPT}$ for which we predict every edge with value lower than $\operatorname{val}_{OPT}$ is unreciprocated and reciprocated otherwise, or vice versa, to maximize prediction accuracy. Intuitively, we expect that larger values of each property correspond to a stronger indication of reciprocity. For example, a high mutual neighbor count for the nodes $v$ and $w$ could strongly indicate the existence of a reciprocated link between them.
 
-We considered 3 different mechanisms of prediction: 
+We considered 4 different mechanisms of prediction: 
 \begin{enumerate}
 \item SYM (predicting symmetry), where we predict whether an edge is bidirectional or asymmetric after removing all information about the edge in question but using existing information about $v$ and $w$, 
 \item REV (predicting a reverse edge), where we predict whether a reverse edge exists given that the forward edge $(v,w)$ exists using information about $v$ and $w$, and finally 
-\item REVW (predicting a reverse edge using only $w$), where we predict whether a reverse edge exists given that $(v,w)$ exists, but only using information about $w$ in making that prediction.
-\item REVV (predicting a reverse edge using only $v$), where we predict whether a reverse edge exists given that $(v,w)$ exists, but only using information about $v$ in making that prediction.
+\item REV-$w$ (predicting a reverse edge using only $w$), where we predict whether a reverse edge exists given that $(v,w)$ exists, but only using information about $w$ in making that prediction.
+\item REV-$v$ (predicting a reverse edge using only $v$), where we predict whether a reverse edge exists given that $(v,w)$ exists, but only using information about $v$ in making that prediction.
 \end{enumerate}
 
-\subsection{Degree/message-based prediction features}
+\subsection{Degree/message features}
 It seems intuitive that the relative indegree or outdegree of nodes would indicate whether a pair of nodes are in a one-sided or two-sided relationship. If both have a similar indegree, this might indicate that they are at a similar social status in the network. In contrast, a disproportionate indegree would indicate that one might be a celebrity and the other an average Joe, thus it would be unlikely that the relationship between them is reciprocated.
+
+We also looked at their absolute counterparts (ex. indegree ratio of $v$ and $w$ to both the indegree of $v$ and the indegree to $w$) to see if these did better or worse on their own, compared to taking the ratio of both.
 
 \emph{Indegree and outdegree ratio} both measure the ratio of outdegrees or indegrees of two nodes, and $\operatorname{val}(v,w) = \deg^-(v)/\deg^-(w)$ or $\deg^+(v)/\deg^+(w)$ respectively.
 
@@ -110,13 +114,83 @@ It seems intuitive that the relative indegree or outdegree of nodes would indica
 \subsection{Link prediction features}
 It is not intuitive whether methods that work well for link prediction would work well in reciprocity; while link prediction asks whether an edge could exist between two nodes, reciprocity prediction asks whether a known edge is bidirectional.
 
-\emph{Jaccard's coefficient} calculates the similarity between two sets by taking the ratio of the cardinality of their intersection and their union. $\operatorname{val}(v,w) = \frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)|}$.
+\emph{Mutual neighbors} calculates the number of common people whom $v$ and $w$ both send messages to ($|\Gamma^+(v) \cap \Gamma^+(w)|$), or the number of people who send messages to both $v$ and $w$ ($|\Gamma^-(v) \cap \Gamma^-(w)|$).
+
+\emph{Jaccard's coefficient}, also based on the concept of mutual neighbors, calculates the similarity between two sets by taking the ratio of the cardinality of their intersection and their union. $\operatorname{val}(v,w) = \frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)|}$.
 
 \emph{Adamic and Adar} \cite{Adamic:2003ud}, defined the similarity between web sites $v,w$ to be $ \sum_{\{x|v,w \text{ share feature }x\}} \frac{1}{\log{\text{frequency}(x)}} $, and we similarly define $\operatorname{val}(v,w)$ to be \[ \sum_{\{x|x \in \Gamma^-(v) \cap \Gamma^-(w)\}} \frac{1}{\log{\deg^-(x)}} .\]
 
-\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. Here, $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^-(w)$.
+\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. Here, $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^+(w)$, or $\deg^+(v)\cdot \deg^-(w)$.
 
-\emph{2 step paths (ratio)} is a simplification of what Katz \cite{Katz:1953un} developed as a measure of status by calculating the number of paths between two nodes. In this study, we only consider paths of length 2, and $\operatorname{val}(v,w) = \sum_{i=1}^2 \beta^i|\operatorname{paths}^i(v,w)|$, where $\beta$ is an arbitary damping constant, and $\operatorname{paths}^i(v,w)$ is the set of paths from $v$ to $w$ of length $i$. The 2 step paths ratio is simply the ratio of number of two step paths from $v$ to $w$ to that from $w$ to $v$. TODO I can also calculate that in the case where you predict a reverse edge, you use the path from $v$ to $w$ in your calculation, thus adding a single on-step path to the calculation.
+\emph{2 step paths (ratio)} is a simplification of what Katz \cite{Katz:1953un} developed as a measure of status by calculating the number of paths between two nodes. In this study, we only consider paths of length 2, and $\operatorname{val}(v,w) = \operatorname{paths}^2(v,w)|$, where $\operatorname{paths}^2(v,w)$ is the set of paths from $v$ to $w$ of length $2$. The 2 step paths ratio is simply the ratio of number of two step paths from $v$ to $w$ to that from $w$ to $v$. 
+
+TODO I can also calculate that in the case where you predict a reverse edge, you use the path from $v$ to $w$ in your calculation, thus adding a single on-step path to the calculation.
+
+\subsection{Different sets of features}
+For convenience, we further break down these two sets of features into four sets:
+\begin{enumerate}
+	\item Absolute degree/message features - degree, messages, message-degrees, outdegree-indegrees
+	\item Relative degree/message features - degree ratios, message ratios, message-degree ratios, and outdegree-indegree ratios
+	\item Two-step hop features - mutual neighbors (in and out), and two step paths ($v$ to $w$ and $w$ to $v$)
+	\item Link prediction features - all other link prediction features not mentioned
+\end{enumerate}
+
+\subsection{Two-step hops}
+\begin{figure}[!t]
+\centering
+\caption{Two-step hops}
+\label{fig_2step}
+\subfloat[2-step ($v$ to $w$)]{
+\begin{tikzpicture}[shorten >=1pt,->]
+  \tikzstyle{vertex}=[circle,fill=black!25,minimum size=17pt,inner sep=0pt]
+
+  \foreach \name/\x in {v/1, ?/2, w/3}
+    \node[vertex] (G-\name) at (\x,0) {$\name$};
+
+  \foreach \from/\to in {v/?, ?/w}
+    \draw (G-\from) -- (G-\to);
+
+\end{tikzpicture}}\quad
+\subfloat[2-step ($w$ to $v$)]{
+\begin{tikzpicture}[shorten >=1pt,->]
+  \tikzstyle{vertex}=[circle,fill=black!25,minimum size=17pt,inner sep=0pt]
+
+  \foreach \name/\x in {v/1, ?/2, w/3}
+    \node[vertex] (G-\name) at (\x,0) {$\name$};
+
+  \foreach \from/\to in {w/?, ?/v}
+    \draw (G-\from) -- (G-\to);
+
+\end{tikzpicture}}
+\\
+\subfloat[Mutual (in)]{
+\begin{tikzpicture}[shorten >=1pt,->]
+  \tikzstyle{vertex}=[circle,fill=black!25,minimum size=17pt,inner sep=0pt]
+
+  \foreach \name/\x in {v/1, ?/2, w/3}
+    \node[vertex] (G-\name) at (\x,0) {$\name$};
+
+  \foreach \from/\to in {?/w, ?/v}
+    \draw (G-\from) -- (G-\to);
+
+\end{tikzpicture}}\quad
+\subfloat[Mutual (out)]{
+\begin{tikzpicture}[shorten >=1pt,->]
+  \tikzstyle{vertex}=[circle,fill=black!25,minimum size=17pt,inner sep=0pt]
+
+  \foreach \name/\x in {v/1, ?/2, w/3}
+    \node[vertex] (G-\name) at (\x,0) {$\name$};
+
+  \foreach \from/\to in {w/?, v/?}
+    \draw (G-\from) -- (G-\to);
+
+\end{tikzpicture}}
+\end{figure}
+The importance of "friends of friends" or people 2 hops away from a given node lends itself to exploring features that directly arise out of the directed @-message graph. There are essentially four types of two-step hops, as shown in figure \ref{fig_2step}, which correspond to either the number of common in-neighbors or out-neighbors (mutual neighbors), or the number of directed paths from $v$ to $w$ or vice versa (two-step paths). 
+
+If both $v$ and $w$ send messages to many common people, it is likely that they are in the same social circle, or it could be that they just like the same celebrities. If $v$ and $w$ receive many messages from the same group of people, it could be that both $v$ and $w$ are in the same community, or that both $v$ and $w$ are celebrities (who may or may not talk to each other) and there is an overlapping fanbase.
+
+As the number of paths from $v$ to $w$ increases, there are two conflicting forces of $w$ being popular and thus it unlikely for $w$ to reciprocate an edge from $v$ to $w$. The reverse case is simpler -- as the number of paths from $w$ to $v$ increases, intuitively the likelihood that $w$ knows $v$ is a lot higher.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -127,11 +201,14 @@ It is not intuitive whether methods that work well for link prediction would wor
 \hline
 \bf{Feature} & $\mathbf{val}(v)$ or $\mathbf{val}(v,w)$\\
 \hline
+\multicolumn{2}{|c|}{\emph{Absolute degree/message features}} \\
+\hline
 Indegree or outdegree & $\deg^-(v)$ or $\deg^+(v)$ \\
 Incoming or outgoing messages & $\operatorname{msg}^-(v)$ or $\operatorname{msg}^+(v)$ \\
 Message-degree (in or out) & $\frac{\operatorname{msg}^-(v)}{\deg^-(v)}$ or $\frac{\operatorname{msg}^+(v)}{\deg^+(v)}$ \\
 Outdegree-indegree & $\frac{\deg^+(v)}{\deg^-(v)}$ \\
 \hline
+\multicolumn{2}{|c|}{\emph{Relative degree/message features}} \\
 \hline
 Indegree ratio & $\deg^-(v) / \deg^-(w)$ \\
 Outdegree ratio & $\deg^+(v) / \deg^+(w)$ \\
@@ -139,11 +216,12 @@ Outdegree ratio & $\deg^+(v) / \deg^+(w)$ \\
 Incoming message ratio & $\operatorname{msg}^-(v) / \operatorname{msg}^-(w)$ \\
 Outgoing message ratio & $\operatorname{msg}^+(v) / \operatorname{msg}^+(w)$ \\
 \hline
-Incoming message-indegree ratio & $\frac{\operatorname{msg}^-(v)}{\deg^-(v)} / \frac{\operatorname{msg}^-(w)}{\deg^-(w)}$ \\
-Outgoing message-indegree ratio & $\frac{\operatorname{msg}^+(v)}{\deg^+(v)} / \frac{\operatorname{msg}^+(w)}{\deg^+(w)}$ \\
+Message-degree ratio (in) & $\frac{\operatorname{msg}^-(v)}{\deg^-(v)} / \frac{\operatorname{msg}^-(w)}{\deg^-(w)}$ \\
+Message-degree ratio (out) & $\frac{\operatorname{msg}^+(v)}{\deg^+(v)} / \frac{\operatorname{msg}^+(w)}{\deg^+(w)}$ \\
 \hline
 Outdegree-indegree ratio & $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} $ \\
 \hline
+\multicolumn{2}{|c|}{\emph{Link prediction features}} \\
 \hline
 Mutual neighbors (in) & $|\Gamma^-(v) \cap \Gamma^-(w)|$ \\
 Mutual neighbors (out) & $|\Gamma^+(v) \cap \Gamma^+(w)|$ \\
@@ -170,18 +248,30 @@ Two-step paths ratio & $\frac{|\operatorname{paths}^2(v,w)|}{|\operatorname{path
 \subsection{Individual properties}
 To calculate the accuracy of the individual heuristics, we calculated the values obtained for each method on a subset of $E_{10}^r \cup E_{10}^u$ of the graph $G_{1000}$, where equal numbers of edges were taken from the two sets of reciprocated and unreciprocated edges. The baseline accuracy is 0.500, since you would achieve this by simply predicting that all edges were of one type.
 
-We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy, where we would predict reciprocity above the threshold, and non-reciprocity otherwise (or vice versa). Table \ref{table_recresults_indiv} summarizes the performance of each heuristic on the subgraph $G_{1000}, k=10$, while table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic. 
+We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy, where we would predict reciprocity above the threshold, and non-reciprocity otherwise (or vice versa). Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic. 
 
 \subsubsection{Comparison of mechanisms of prediction}
 
 In table \ref{table_recresults_indeg}, SYM$^+$ refers to the prediction mechanism where we aim to predict symmetry and predict all edges with values \emph{above} $val_{OPT}$ to be reciprocated, and REV$^-$ refers to the mechanism where we aim to predict whether a reverse edge $(w,v)$ exists given $(v,w)$ and predict all edges with values \emph{below} $val_{OPT}$ to be reciprocated. 
 
-We observe slightly higher accuracy for the REV task than SYM, as REV is ``easier" than SYM since you know more information about the edge $(v,w)$. Surprisingly, REVW performs even better TODO Why? We do notice that in all cases you want to predict that the top 40\% of values as being reciprocated. 
+We observe slightly higher accuracy for the REV task than SYM, as REV is ``easier" than SYM since you know more information about the edge $(v,w)$.
 
-Note that SYM$^-$, REV$^-$ and REVW$^+$ did so poorly that simply predicting that everything was reciprocated (or unreciprocated) would do better.
+Comparing REV-$v$ to REV-$w$, we see REV-$w$ performing better than REV-$v$, since we're trying to predict the existence of the edge from $w$ to $v$ given $(v,w)$, and it would appear that knowing about $w$ is a lot more valuable than knowing about $v$.
+
+Note that SYM$^-$, REV$^-$, REV$-w^+$ and REV-$v^-$ do so poorly that simply predicting that everything was reciprocated (or unreciprocated) would do better.
 
 \subsubsection{Comparison of methods of prediction}
+\paragraph{Trends}
 On the whole, outdegree-indegree ratio and the two-step paths ratio are the best indicators of reciprocity.
+
+\paragraph{Larger is better?}
+When we look at features using one of the four mechanisms, the larger the value, the more likely it is for reciprocation to occur, and this is the case for a majority of features. For example, a 
+However,
+TODO Two-step paths $v$ to $w$.
+TODO Preferential attachment both ways.
+
+\paragraph{REV-$v$ vs. REV-$w$}
+Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, the difference is not as significant. Analagous to whether you would want to know more about the features of a marketer ($v$) vs. a subscriber ($w$), knowing about the subscriber tells us more about the relationship between both.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -192,12 +282,19 @@ On the whole, outdegree-indegree ratio and the two-step paths ratio are the best
 \hline
 \bf{Mechanism} & $\mathbf{val}_{OPT}$ (Percentile) & \bf{Accuracy} \\
 \hline
+\multicolumn{3}{|c|}{\emph{Indegree ratio}} \\
+\hline
 SYM$^+$ & 0.256 (40) & 0.702 \\
 SYM$^-$ & - & - \\
-REV$^+$ & 0.261 (40) & 0.705 \\
+REV$^+$ & 0.414 (46) & 0.759 \\
 REV$^-$ & - & - \\
-REVW$^+$ & - & - \\
-REVW$^-$ & 74 (61) & 0.731 \\
+\hline
+\multicolumn{3}{|c|}{\emph{Indegree of $v$ or $w$}} \\
+\hline
+REV-$w^+$ & - & - \\
+REV-$w^-$ & 74 (61) & 0.731 \\
+REV-$v^+$ &  61 (60) & 0.582 \\
+REV-$v^-$ & - & - \\
 \hline
 \end{tabular}
 \end{table}
@@ -211,16 +308,16 @@ REVW$^-$ & 74 (61) & 0.731 \\
 \hline
 \bf{Method} & $\mathbf{val}_{OPT}$ (Percentile) & \bf{Accuracy} \\
 \hline
-Indegree ratio & 0.261 (40) & 0.705 \\
-Outdegree ratio & 0.398 (35) & 0.579 \\
+Indegree ratio & 0.414 (46) & 0.759 \\
+Outdegree ratio & 0.667 (43) & 0.628 \\
 \hline
-Incoming message ratio & 0.202 (42) & 0.721 \\
-Outgoing message ratio & 0.681 (61) & 0.507 \\
+Incoming message ratio & 0.333 (48) & 0.772 \\
+Outgoing message ratio & 0.905 (46) & 0.547 \\
 \hline
-Incoming message-indegree ratio & 0.462 (38) & 0.551 \\
-Outgoing message-outdegree ratio & 0.477 (33) & 0.568 \\
+Incoming message-indegree ratio & 0.650 (39) & 0.569 \\
+Outgoing message-outdegree ratio & 0.791 (33) & 0.615* \\
 \hline
-Outdegree-indegree ratio & 0.496 (46) & 0.777 \\
+Outdegree-indegree ratio & 1.72 (53) & 0.820* \\
 \hline
 Mutual neighbors (in) & 10 (61) & 0.552 \\
 Mutual neighbors (out) & 8 (51) & 0.580 \\
@@ -243,7 +340,7 @@ Preferential attachment ($w$ to $v$) & 2610 (37) & 0.534* \\
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
-\caption{Reciprocity Prediction Method Performance: Individual (REVV,REVW)}
+\caption{Reciprocity Prediction Method Performance: Individual (REV-$v$,REV-$w$)}
 \label{table_recresults_indivVW}
 \centering
 \begin{tabular}{|c||c|c|}
@@ -272,18 +369,15 @@ Outdegree-indegree (w) & 0.747 (50) & 0.777 \\
 \end{table}
 
 \subsection{Decision tree analysis}
-We can also focus on interesting subsets of features to see if they significantly improve the results obtained.
 
-We considered these 4 subsets of features
+We then combined subsets of features and evaluated their performance, by splitting the edges in $E^r_10 \cup E_10^u$ randomly into two sets, training on one and evaluating on the other.
+
+The following combined subsets, in addition to each individual subset, were considered:
 \begin{enumerate}
-	\item Degree/message features - degree, messages, message-degrees, outdegree-indegrees
-	\item Degree/message ratio features - degree ratios, message ratios, message-degree ratios, and outdegree-indegree ratios
-	\item 2 step path features - mutual neighbors (in and out), and two step paths ($v$ to $w$ and $w$ to $v$)
-	\item Link prediction features - all other features not mentioned
+	\item {\bf All} (sets 1-4) -- every single feature was considered.
+	\item {\bf All ratio} (sets 2,3,4) -- all features that used ratios were considered.
+	\item {\bf All absolute} (sets 1,3,4) -- we wanted to see how using "absolute" features would affect our decision accuracy.
 \end{enumerate}
-
-We then combined all the features (1-4), as well as considered only "ratio" features (2-4), and evaluated their performance, by splitting the edges in $E^r_10 \cup E_10^u$ randomly into two sets, training on one and evaluating on the other.
-
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
 \caption{Decision Tree Accuracy}
@@ -291,80 +385,52 @@ We then combined all the features (1-4), as well as considered only "ratio" feat
 \centering
 \begin{tabular}{|c||c|c|}
 \hline
-\bf{Set} & Accuracy & Most Important \\
+\bf{Set} & Accuracy & Top-level attribute \\
 \hline
-Degree/message & 0.828 & Outdegree-indegree ratio \\
-Degree/message ratio & 0.822 & Outdegree-indegree ratio \\
-2 step paths & 0.795 & Two-step paths ($w$ to $v$) \\
-Link prediction & 0.742 & Two-step paths ratio (directed) \\
-All ratio & 0.822 & Outdegree-indegree ratio \\
-All & 0.834 & Outdegree-indegree ratio \\
+Degree/message (1) & 0.828 & Outdegree-indegree (w) \\
+Degree/message ratio (2) & 0.861 & Outdegree-indegree ratio \\
+Two step hops (3) & 0.795 & Two-step paths ($w$ to $v$) \\
+Link prediction (4) & 0.742 & Two-step paths ratio (directed) \\
+\hline
+\multicolumn{3}{|c|}{\emph{Combined}} \\
+\hline
+All ratio (2,3,4) & 0.861 & Outdegree-indegree ratio \\
+All absolute (1,3,4) & 0.828 & Outdegree-indegree (w) \\
+All (1-4) & 0.861 & Outdegree-indegree ratio \\
 \hline
 \end{tabular}
 \end{table}
 
-When we only use degree/message-based features, we obtain a prediction accuracy of 0.816. The most important factor was the outdegree-indegree ratio, and the least important factor the incoming message/indegree and outgoing message/outdegree ratios.
+We notice that the accuracy when we only use degree/message features compared to that when we include all features is the same. 
 
-Notice that in the end the accuracy of the decision tree obtained by only using the relatively simpler degree/message features is only marginally worse than that using all features discussed above.
+Whenever the outdegree-indegree value or ratio was included as an attribute, it became the most important.
 
 \subsection{Regression analysis}
 We used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$ and $z = \beta_0 + \beta F$, where $f(z)$ is binary and takes the value 1 when an edge is reciprocated, and 0 otherwise. $F$ is the vector of features.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
-\caption{Logistic regression on degree/message-based features}
+\caption{Logistic regression -- relative degree/message-based features}
 \label{table_recresults_logr}
 \centering
 \begin{tabular}{|c||c|c|}
 \hline
 \bf{Feature} & $\mathbf{\beta}$ & $\mathbf{p}$ value \\
 \hline
-Indegree ratio & 0.0082415 & $< 2 \e{-16} $ \\
-Outdegree ratio & -0.0006923 & 3.91 \e{-6} \\
-Incoming messages ratio & 0.0139543 & $< 2 \e{-16} $ \\
-Outgoing messages ratio & -0.0035366 & $< 2 \e{-16} $ \\
-Incoming messages-indegree ratio & 0.0006435 & 2.21 \e{-6} \\
-Outgoing messages-outdegree ratio & 0.0027760 & $< 2 \e{-16} $ \\
-Outdegree-indegree ratio & 0.0434046 & $< 2 \e{-16} $ \\
+Indegree ratio & 0.0101903 & $< 2 \e{-16} $ \\
+Outdegree ratio & 0.0005775 & \sout{0.2545} \\
+Incoming messages ratio & 0.0230161 & $< 2 \e{-16} $ \\
+Outgoing messages ratio & -0.0047152 & $< 2 \e{-16} $ \\
+Incoming messages-indegree ratio & -0.0005545 & \sout{0.0798} \\
+Outgoing messages-outdegree ratio & -0.0049387 & $< 2 \e{-16} $ \\
+Outdegree-indegree ratio & \bf{-0.0562983} & $< 2 \e{-16} $ \\
 \hline
 \end{tabular}
 \end{table}
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
-\caption{Logistic regression on most features}
-\label{table_recresults_lograll2}
-\centering
-\begin{tabular}{|c||c|c|}
-\hline
-\bf{Feature} & $\mathbf{\beta}$ & $\mathbf{p}$ value \\
-\hline
-Indegree ratio     &    0.0027550  & $< 2 \e{-16} $\\
-Outdegree ratio    &   -0.0025601  & $< 2 \e{-16} $\\
-Incoming messages ratio    &    0.0118058  & $< 2 \e{-16} $\\
-Outgoing messages ratio   &   -0.0027928  & $< 2 \e{-16} $\\
-Incoming messages-indegree ratio      &   0.0006257 &  0.000147 \\
-Outgoing messages-outdegree ratio   &     0.0010365 &  $7.48 \e{-10}$ \\
-Outdegree-indegree ratio  &   0.0224308  & $< 2 \e{-16} $\\
-\hline
-Mutual Neighbors (in) & -0.0206470  &$< 2 \e{-16} $\\
-Mutual Neighbors (out) & 0.0150586  & $< 2 \e{-16} $\\
-Two-step paths ($v$ to $w$)  &  -0.0768816   & $< 2 \e{-16} $\\
-Two-step paths ($w$ to $v$)   &    0.0186746   & $< 2 \e{-16} $\\
-\hline
-Two-step paths (directed)  &   0.0628968 & $< 2 \e{-16} $\\
-Jaccard (in) & -0.0259322 & $< 2 \e{-16} $\\
-Jaccard (out) &   0.0547273  & $< 2 \e{-16} $\\
-Adamic-Adar  &    -0.0030061 & 0.001006 ** \\
-Preferential attachment ($v$ to $w$) &  0.0014906  & $8.86 \e{-7}$ \\
-Preferential attachment ($w$ to $v$)  &  - & -  \\
-\hline
-\end{tabular}
-\end{table}
-
-\begin{table}[!t]
-\renewcommand{\arraystretch}{1.3}
-\caption{Logistic regression on two-step path features}
+\caption{Logistic regression -- two-step hop features}
 \label{table_recresults_logrpath}
 \centering
 \begin{tabular}{|c||c|c|}
@@ -381,46 +447,78 @@ Two-step paths ($w$ to $v$) & 0.1296081 & $< 2 \e{-16} $ \\
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
-\caption{Logistic regression on all features}
+\caption{Logistic regression -- All ratio}
+\label{table_recresults_lograll2}
+\centering
+\begin{tabular}{|c||c|c|}
+\hline
+\bf{Feature} & $\mathbf{\beta}$ & $\mathbf{p}$ value \\
+\hline
+Indegree ratio     &    0.0120256  & $< 2 \e{-16} $\\
+Outdegree ratio    &   -0.0015554  & 0.005739 \\
+Incoming messages ratio    &    0.0145437  & $< 2 \e{-16} $\\
+Outgoing messages ratio   &   -0.0043189  & $< 2 \e{-16} $\\
+Incoming messages-indegree ratio   & 0.0048525   & $< 2 \e{-16} $ \\
+Outgoing messages-outdegree ratio   & -0.0046674 & $< 2 \e{-16} $ \\
+Outdegree-indegree ratio  &  -0.0301592  & $< 2 \e{-16} $\\
+\hline
+Mutual Neighbors (in) & -0.0279290  &$< 2 \e{-16} $\\
+Mutual Neighbors (out) & 0.0147103  & $< 2 \e{-16} $\\
+Two-step paths ($v$ to $w$)  &  \bf{-0.0530463}   & $< 2 \e{-16} $\\
+Two-step paths ($w$ to $v$)   &    0.0182572   & $< 2 \e{-16} $\\
+\hline
+Two-step paths (directed)  &   \bf{0.0394657} & $< 2 \e{-16} $\\
+Jaccard (in) & -0.0238541 & $< 2 \e{-16} $\\
+Jaccard (out) &   \bf{0.0572358}  & $< 2 \e{-16} $\\
+Adamic-Adar  &    -0.0001424 & \sout{0.881637} \\
+Preferential attachment ($v$ to $w$) & 0.0010837  & 0.000627 \\
+Preferential attachment ($w$ to $v$)  &  - & -  \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!t]
+\renewcommand{\arraystretch}{1.3}
+\caption{Logistic regression - All}
 \label{table_recresults_lograll3}
 \centering
 \begin{tabular}{|c||c|c|}
 \hline
 \bf{Feature} & $\mathbf{\beta}$ & $\mathbf{p}$ value \\
 \hline
-Indegree ratio     &    $-6.655 \e{-5}$  & 0.805513  \\
-Outdegree ratio    &  $1.919\e{-4}$  & $0.343554$\\
-Incoming messages ratio    &   $5.349\e{-3}$  & $< 2 \e{-16} $\\
-Outgoing messages ratio   &   $-3.813\e{-4}$  & $0.022552 $\\
-Incoming messages-indegree ratio      & $ 5.738\e{-4}$ &  0.001886 \\
-Outgoing messages-outdegree ratio   &  $3.719\e{-4}$ &  $0.042062$ \\
-Outdegree-indegree ratio  &   $3.513\e{-3}$ & $< 2 \e{-16} $\\
+Indegree ratio     &    0.0041791  & $6.09\e{-8}$  \\
+Outdegree ratio    & 0.0046914 & $1.28\e{-13}$ \\
+Incoming messages ratio    &   0.0029794  & 0.000125 \\
+Outgoing messages ratio   &   0.0033361  & $3.10\e{-10}$ \\
+Incoming messages-indegree ratio & 0.0040884 &  $1.11\e{-14}$ \\
+Outgoing messages-outdegree ratio &  -0.0015075 &  0.006283 \\
+Outdegree-indegree ratio  &   -0.0057958 & $< 2 \e{-16} $\\
 \hline
-Indegree (v) & $4.926\e{-3}$ & $ 5.90 \e{-11}$ \\
-Indegree (w) & $-1.396\e{-2}$ & $<2 \e{-16} $ \\
-Outdegree (v) & $-2.398\e{-3}$ & 0.000329 \\
-Outdegree (w) & $5.488\e{-4}$ & 0.409620 \\
-Incoming messages (v) & $8.695\e{-3}$ & $<2 \e{-16} $ \\
-Incoming messages (w) & $-1.994\e{-2}$ & $<2 \e{-16} $ \\
-Outgoing messages (v) & $-4.922\e{-3}$ & $<2 \e{-16} $\\
-Outgoing messages (w) & $7.730\e{-3}$ & $<2 \e{-16} $ \\
-Incoming message-indegree (v) & $-1.281\e{-3}$ & 0.002439 \\
-Incoming message-indegree (w) & $-1.734\e{-3}$ & $1.78\e{-5}$ \\
-Outgoing message-outdegree (v) & $-2.078\e{-5}$ & 0.964674 \\
-Outgoing message-outdegree (w) &$ 2.368\e{-3}$ & $4.82\e{-7}$ \\
-Outdegree-indegree (v) & $-1.241\e{-2}$ & $<2 \e{-16} $ \\
-Outdegree-indegree (w) & $2.175\e{-2}$ & $<2 \e{-16} $ \\
+Indegree (v) & 0.0050520 & $ 4.30 \e{-11}$ \\
+Indegree (w) & -0.0089197 & $<2 \e{-16} $ \\
+Outdegree (v) & -0.0063247 & $<2 \e{-16}$ \\
+Outdegree (w) & 0.0035881 & $3.58\e{-7}$ \\
+Incoming messages (v) & 0.0063390 & $<2 \e{-16} $ \\
+Incoming messages (w) & -0.0179975 & $<2 \e{-16} $ \\
+Outgoing messages (v) & -0.0070869 & $<2 \e{-16} $\\
+Outgoing messages (w) & 0.0095572 & $<2 \e{-16} $ \\
+Incoming message-indegree (v) & -0.0023250 & $1.11\e{-5}$ \\
+Incoming message-indegree (w) & -0.0004044 & \sout{0.42781} \\
+Outgoing message-outdegree (v) & 0.0007430 & \sout{0.175454}  \\
+Outgoing message-outdegree (w) & 0.0024155 & $2.54\e{-5}$ \\
+Outdegree-indegree (v) & -0.0110324 & $<2 \e{-16} $ \\
+Outdegree-indegree (w) & 0.0218874 & $<2 \e{-16} $ \\
 \hline
-Mutual Neighbors (in) & $-1.921\e{-2}$  &$< 2 \e{-16} $\\
-Mutual Neighbors (out) & $4.655\e{-3}$  & $< 2 \e{-16} $\\
-Two-step paths ($v$ to $w$)  &  $-4.565\e{-2}$   & $< 2 \e{-16} $\\
-Two-step paths ($w$ to $v$)   &    $1.642\e{-2}$   & $< 2 \e{-16} $\\
+Mutual Neighbors (in) &-0.0194635  &$< 2 \e{-16} $\\
+Mutual Neighbors (out) &0.0050245  & $< 2 \e{-16} $\\
+Two-step paths ($v$ to $w$)  &  -0.0462950   & $< 2 \e{-16} $\\
+Two-step paths ($w$ to $v$)   &    0.0167156  & $< 2 \e{-16} $\\
 \hline
-Two-step paths (directed)  &   4.499\e{-2} & $< 2 \e{-16} $\\
-Jaccard (in) & $-4.137\e{-2}$ & $< 2 \e{-16} $\\
-Jaccard (out) &   $5.480\e{-2}$  & $< 2 \e{-16} $\\
-Adamic-Adar  &    $1.219\e{-2}$ & $< 2 \e{-16} $ \\
-Preferential attachment ($v$ to $w$) & $9.399\e{-4}$  & $0.003529$ \\
+Two-step paths (directed)  &   0.0440107 & $< 2 \e{-16} $\\
+Jaccard (in) & -0.0398243 & $< 2 \e{-16} $\\
+Jaccard (out) &   0.0561815  & $< 2 \e{-16} $\\
+Adamic-Adar  & 0.0111504 & $< 2 \e{-16} $ \\
+Preferential attachment ($v$ to $w$) & 0.0009537 & 0.003002 \\
 Preferential attachment ($w$ to $v$)  &  - & -  \\
 \hline
 \end{tabular}
