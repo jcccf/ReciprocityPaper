@@ -39,7 +39,7 @@ anon@whoare.you}}
 
 \begin{abstract}
 %\boldmath
-In this paper we investigate methods of predicting reciprocity in social networks, and use machine learning and regression to determine good indicators of reciprocity. Using the Twitter @ message graph, we discover that the ratio of a node's outdegree to its indegree is the best predictor of reciprocity, and that heuristics used in link prediction do not necessarily perform well in reciprocity prediction. In fact, using only "degree/message" properties <<rephrase>> is sufficient in obtaining maximum accuracy.
+In this paper we investigate methods of predicting reciprocity in social networks, and use machine learning and regression to determine good indicators of reciprocity. Using the Twitter @ message graph, we discover that the ratio of a node's outdegree to its indegree is the best predictor of reciprocity, and that heuristics used in link prediction do not necessarily perform well in reciprocity prediction. In fact, using only simple properties that relate to the degree of a node or the number of messages that it sends or receives is sufficient in obtaining maximum accuracy in this prediction <<rephrase?>>.
 \end{abstract}
 
 % no keywords
@@ -68,13 +68,13 @@ Twitter is a good domain to explore the superposition of the reciprocated and un
 \subsection{Problem definition}
 The input to our prediction problem is a graph $G=(V,E)$ and a node pair $\{v,w\}$, where $v,w \in V$ but all edges between $v$ and $w$ removed. Our task is to predict the direction of edges between $v$ and $w$.
 
-Reciprocity prediction on this graph can be defined in two ways. In the first, given that at least one edge exists between $v$ and $w$, decide whether both $(v,w)$ and $(w,v)$ exist (bidirected/symmetric), or only one of $(v,w)$, $(w,v)$ exists (asymmetry). In the second, given an edge $(v,w)$, decide whether $(w,v)$ exists.
+The problem of predicting reciprocation can be defined in two ways. In the first, we decide whether both $(v,w)$ and $(w,v)$ exist (bidirected/symmetric), or only one of $(v,w)$, $(w,v)$ exists (asymmetry), given that at least one edge exists between $v$ and $w$. In the second, we decide whether $(w,v)$ exists given an edge $(v,w)$. It would appear that predicting symmetry in the relation between nodes is more difficult than predicting reciprocation in a specific direction, and we show that this is indeed the case.
 
 \subsection{Notation}
 
-We subsequently consider the subgraphs of the form $G_n = (V_n, E_n)$, where $V_n = \{v~|~v \in V, v \text{ sent } \ge n \text{ messages}\}$ and $E_n = \{e=(v,w)~|~e \in E,~v \text{ and } w \in V_n\}$.
+We consider the subgraphs of the form $G_n = (V_n, E_n)$, where $V_n = \{v~|~v \in V, v \text{ sent } \ge n \text{ messages}\}$ and $E_n = \{e=(v,w)~|~e \in E,~v \text{ and } w \in V_n\}$.
 
-Also define \(v \xrightarrow{k} w$, which means $v$ sent $w$ $k$ messages. From this definition we can formalize reciprocity in terms of $k$. We define an edge $(v,w)$ to be reciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and unreciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{0} v$.
+We also define \(v \xrightarrow{k} w$, which means $v$ sent $w$ $k$ messages. From this definition we can formalize reciprocity in terms of $k$. We define an edge $(v,w)$ to be reciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and unreciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{0} v$.
 
 Let the set of reciprocated edges be \(E_k^r = \{ (v,w) : v \xrightarrow{k} w \text{ and } w \xrightarrow{k} v \} \), and the set of unreciprocated edges be \(E_k^u = \{ (v,w) : v \xrightarrow{k} w\} \).
 
@@ -83,14 +83,16 @@ Let $\deg^-(v)$ and $\deg^+(v)$ be the indegree and outdegree of node $v$ respec
 \section{Dataset description}
 The sample dataset consisted of the directed @ message graph $G=(V,E)$ of the Twitter network from (TIME) to (TIME). 12,795,683 unique users ($|V|$) sent a total of 819,305,776 messages, with 156,868,257 unique directed interactions ($|E|$) taking place between users during this time.
 
-In $G_{1000}$, $|E^r_{10}| = 797,342$, $|E^u_{10}| = 349,258$.
+We focus our analysis on a subgraph of this, the graph in which each person sends at least 1000 messages each ($G_{1000}$). In $G_{1000}$, $|E^r_{10}| = 797,342$, $|E^u_{10}| = 349,258$.
 
 \section{Methods for Reciprocity Prediction}
-Intuitively, features and measure whether $v$ and $w$ have similar status or a similar social circle, and each is potentially useful in predicting reciprocation. This section presents a survey of various methods that can be used in predicting reciprocity in networks. Each method assigns a value $\operatorname{val}(v,w)$ to a node pair $\{v,w\}$. Given values corresponding to all node pairs in question, we can then choose threshold values or ranges where we predict reciprocity, and non-reciprocity otherwise.
+Intuitively, features can measure whether $v$ and $w$ have similar status or a similar social circle, and both are potentially useful in predicting reciprocation. This section presents 
+a survey of various methods that can be used in predicting reciprocity in networks. Each method assigns a value $\operatorname{val}(v,w)$ to a node pair $(v,w)$, or a value $\operatorname{val}(v)$ to a single node $v$. Given values corresponding to all node pairs (or nodes) in question, we can then choose threshold values or ranges where we predict reciprocity, and none otherwise.
 
-For each property, we picked a single value $\operatorname{val}_{OPT}$ for which we predict every edge with value lower than $\operatorname{val}_{OPT}$ is unreciprocated and reciprocated otherwise, or vice versa, to maximize prediction accuracy. Intuitively, we expect that larger values of each property correspond to a stronger indication of reciprocity. For example, a high mutual neighbor count for the nodes $v$ and $w$ could strongly indicate the existence of a reciprocated link between them.
+For each property, we picked a single value $\operatorname{val}_{OPT}$ for which we predict every pair with value lower than $\operatorname{val}_{OPT}$ as unreciprocated and reciprocated otherwise, or vice versa, to maximize prediction accuracy. Intuitively, we expect that larger values of each property correspond to a stronger indication of reciprocity. For example, a high mutual neighbor count for the nodes $v$ and $w$ could strongly indicate the existence of a reciprocated link between them.
 
-We considered 4 different mechanisms of prediction: 
+Now, given the two ways that we can formulate the prediction problem, we present four different mechanisms that we can use to predict reciprocity. The first attempts to answer the question of symmetry, while the other three answer the problem of reciprocity, with different limits on the amount of information about the nodes in question used.
+
 \begin{enumerate}
 \item SYM (predicting symmetry), where we predict whether an edge is bidirectional or asymmetric after removing all information about the edge in question but using existing information about $v$ and $w$, 
 \item REV (predicting a reverse edge), where we predict whether a reverse edge exists given that the forward edge $(v,w)$ exists using information about $v$ and $w$, and finally 
@@ -98,18 +100,20 @@ We considered 4 different mechanisms of prediction:
 \item REV-$v$ (predicting a reverse edge using only $v$), where we predict whether a reverse edge exists given that $(v,w)$ exists, but only using information about $v$ in making that prediction.
 \end{enumerate}
 
-\subsection{Degree/message features}
-It seems intuitive that the relative indegree or outdegree of nodes would indicate whether a pair of nodes are in a one-sided or two-sided relationship. If both have a similar indegree, this might indicate that they are at a similar social status in the network. In contrast, a disproportionate indegree would indicate that one might be a celebrity and the other an average Joe, thus it would be unlikely that the relationship between them is reciprocated.
+With this framework, we can now choose specific features of the @ message graph that we can plug in and compare their relative performance, and also their combined performance.
 
-We also looked at their absolute counterparts (ex. indegree ratio of $v$ and $w$ to both the indegree of $v$ and the indegree to $w$) to see if these did better or worse on their own, compared to taking the ratio of both.
+\subsection{Degree/message features}
+It seems intuitive that the relative indegree or outdegree of nodes would indicate whether a pair of nodes are in a one-sided or two-sided relationship. If both have a similar indegree, this might indicate that they are at a similar social status in the network. In contrast, a disproportionate indegree would indicate that one might be a celebrity and the other an average Joe, making it unlikely that their relationship is reciprocal.
+
+For these features, we also looked at their absolute "counterparts" (ex. the indegree of $v$ or the indegree of $w$ of the edge $(v,w)$).
 
 \emph{Indegree and outdegree ratio} both measure the ratio of outdegrees or indegrees of two nodes, and $\operatorname{val}(v,w) = \deg^-(v)/\deg^-(w)$ or $\deg^+(v)/\deg^+(w)$ respectively.
 
-\emph{Inmessage and outmessage ratio} are similar, but instead also take into account the total number of messages that a node receives or sends, rather than the unique nodes that a node sends messages to or receives messages from.
+\emph{Incoming message and outgoing message ratio} are similar, but instead uses the total number of messages that a node receives or sends, rather than the unique nodes that a node sends messages to or receives messages from.
 
-\emph{Incoming message/indegree ratio and outgoing message/outdegree ratio} compares the ratio of two nodes' incoming message to indegree ratio or outgoing message to outdegree ratio. People with a high incoming message to indegree ratio might characterize people who have a small group of friends with which they exchange lots of messages, while those with a low incoming message to indegree ratio might characterize highly connected (and thus high-status) people in a network (as the messages they receive is "spread" over many more users).
+\emph{Incoming message/indegree ratio and outgoing message/outdegree ratio} compares the ratio of two nodes' incoming message to indegree ratio or outgoing message to outdegree ratio. A high incoming message to indegree ratio might characterize people who have a small group of friends with which they exchange lots of messages, while a low incoming message to indegree ratio might characterize highly connected (and thus high-status) people in a network (as the messages they receive is "spread" over many more users).
 
-\emph{Outdegree/indegree ratio} is a heuristic that attempts to characterize the messaging activity of a single node - a celebrity might have high outdegree/indegree ratio because she receive many messages from many followers but herself sends relatively few messages. We then characterize the ratio of the outdegree/indegree ratio of two nodes, or $\operatorname{val}(v,w) = \frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)}$.
+\emph{Outdegree/indegree ratio} is a heuristic that attempts to characterize the messaging activity of a single node - a celebrity might have high outdegree/indegree ratio because she receive many messages from many followers but herself sends relatively few messages. We then compute the ratio of the outdegree/indegree ratio of two nodes, or $\operatorname{val}(v,w) = \frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)}$.
 
 \subsection{Link prediction features}
 It is not intuitive whether methods that work well for link prediction would work well in reciprocity; while link prediction asks whether an edge could exist between two nodes, reciprocity prediction asks whether a known edge is bidirectional.
@@ -120,14 +124,14 @@ It is not intuitive whether methods that work well for link prediction would wor
 
 \emph{Adamic and Adar} \cite{Adamic:2003ud}, defined the similarity between web sites $v,w$ to be $ \sum_{\{x|v,w \text{ share feature }x\}} \frac{1}{\log{\text{frequency}(x)}} $, and we similarly define $\operatorname{val}(v,w)$ to be \[ \sum_{\{x|x \in \Gamma^-(v) \cap \Gamma^-(w)\}} \frac{1}{\log{\deg^-(x)}} .\]
 
-\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. Here, $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^+(w)$, or $\deg^+(v)\cdot \deg^-(w)$.
+\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. Here, $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^+(w)$, or $\deg^+(v)\cdot \deg^-(w)$. Notice that taking the ratio of these two values is equivalent to the outdegree/indegree ratio between two nodes.
 
 \emph{2 step paths (ratio)} is a simplification of what Katz \cite{Katz:1953un} developed as a measure of status by calculating the number of paths between two nodes. In this study, we only consider paths of length 2, and $\operatorname{val}(v,w) = \operatorname{paths}^2(v,w)|$, where $\operatorname{paths}^2(v,w)$ is the set of paths from $v$ to $w$ of length $2$. The 2 step paths ratio is simply the ratio of number of two step paths from $v$ to $w$ to that from $w$ to $v$. 
 
 TODO I can also calculate that in the case where you predict a reverse edge, you use the path from $v$ to $w$ in your calculation, thus adding a single on-step path to the calculation.
 
 \subsection{Different sets of features}
-For convenience, we further break down these two sets of features into four sets:
+For convenience, we further break down these into four sets of features:
 \begin{enumerate}
 	\item Absolute degree/message features - degree, messages, message-degrees, outdegree-indegrees
 	\item Relative degree/message features - degree ratios, message ratios, message-degree ratios, and outdegree-indegree ratios
