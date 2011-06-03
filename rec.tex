@@ -128,7 +128,7 @@ It is not intuitive whether methods that work well for link prediction would wor
 
 \emph{2 step paths (ratio)} is a simplification of what Katz \cite{Katz:1953un} developed as a measure of status by calculating the number of paths between two nodes. In this study, we only consider paths of length 2, and $\operatorname{val}(v,w) = \operatorname{paths}^2(v,w)|$, where $\operatorname{paths}^2(v,w)$ is the set of paths from $v$ to $w$ of length $2$. The 2 step paths ratio is simply the ratio of number of two step paths from $v$ to $w$ to that from $w$ to $v$. 
 
-TODO I can also calculate that in the case where you predict a reverse edge, you use the path from $v$ to $w$ in your calculation, thus adding a single on-step path to the calculation.
+TODO I can also calculate that in the case where you predict a reverse edge, you use the path from $v$ to $w$ in your calculation, thus adding a single on-step path to the calculation. But this ends up being worse, so probably it's not important to include.
 
 \subsection{Different sets of features}
 For convenience, we further break down these into four sets of features:
@@ -190,9 +190,9 @@ For convenience, we further break down these into four sets of features:
 
 \end{tikzpicture}}
 \end{figure}
-The importance of "friends of friends" or people 2 hops away from a given node lends itself to exploring features that directly arise out of the directed @-message graph. There are essentially four types of two-step hops, as shown in figure \ref{fig_2step}, which correspond to either the number of common in-neighbors or out-neighbors (mutual neighbors), or the number of directed paths from $v$ to $w$ or vice versa (two-step paths). 
+The importance of "friends of friends" or people 2 hops away from a given node lends itself to exploring features that directly arise out of the directed @-message graph. There are essentially four types of two-step hops, as shown in figure \ref{fig_2step}, corresponding to either the number of common in-neighbors or out-neighbors (mutual neighbors), or the number of directed paths from $v$ to $w$ or vice versa (two-step paths). 
 
-If both $v$ and $w$ send messages to many common people, it is likely that they are in the same social circle, or it could be that they just like the same celebrities. If $v$ and $w$ receive many messages from the same group of people, it could be that both $v$ and $w$ are in the same community, or that both $v$ and $w$ are celebrities (who may or may not talk to each other) and there is an overlapping fanbase.
+If both $v$ and $w$ send messages to many common people, it is likely that they are in the same social circle, or it could be that $v$ and $w$ simply message the same celebrities. If $v$ and $w$ receive many messages from the same group of people, it could be that both $v$ and $w$ are in the same community, or that both $v$ and $w$ are celebrities (who may or may not talk to each other) and there is an overlapping fanbase.
 
 As the number of paths from $v$ to $w$ increases, there are two conflicting forces of $w$ being popular and thus it unlikely for $w$ to reciprocate an edge from $v$ to $w$. The reverse case is simpler -- as the number of paths from $w$ to $v$ increases, intuitively the likelihood that $w$ knows $v$ is a lot higher.
 
@@ -250,32 +250,37 @@ Two-step paths ratio & $\frac{|\operatorname{paths}^2(v,w)|}{|\operatorname{path
 \section{Results and Discussion}
 
 \subsection{Individual properties}
-To calculate the accuracy of the individual heuristics, we calculated the values obtained for each method on a subset of $E_{10}^r \cup E_{10}^u$ of the graph $G_{1000}$, where equal numbers of edges were taken from the two sets of reciprocated and unreciprocated edges. The baseline accuracy is 0.500, since you would achieve this by simply predicting that all edges were of one type.
+To calculate the accuracy of the individual heuristics, we calculated $\operatorname{val}$ for each feature on the subset $E_{10}^r \cup E_{10}^u$ of the graph $G_{1000}$, where equal numbers of edges were taken from the two sets of reciprocated and unreciprocated edges. This would give a baseline accuracy is 0.500, and you would achieve this by predicting that all edges were of one type. We applied the SYM and REV mechanisms to feature sets 2-4, and REV-$v$ and REV-$w$ to feature set 1.
 
-We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy, where we would predict reciprocity above the threshold, and non-reciprocity otherwise (or vice versa). Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic. 
+We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic.
 
-\subsubsection{Comparison of mechanisms of prediction}
+In tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW}, a star ($*$) indicates that reciprocity was predicted when $\operatorname{val}$ was below the threshold, and a lack thereof indicates reciprocity was predicted when $\operatorname{val}$ was above the threshold.
 
 In table \ref{table_recresults_indeg}, SYM$^+$ refers to the prediction mechanism where we aim to predict symmetry and predict all edges with values \emph{above} $val_{OPT}$ to be reciprocated, and REV$^-$ refers to the mechanism where we aim to predict whether a reverse edge $(w,v)$ exists given $(v,w)$ and predict all edges with values \emph{below} $val_{OPT}$ to be reciprocated. 
 
-We observe slightly higher accuracy for the REV task than SYM, as REV is ``easier" than SYM since you know more information about the edge $(v,w)$.
+\subsubsection{Comparison of prediction mechanisms}
+We observe higher accuracy for the REV task than SYM, as REV is ``easier" than SYM since you know more information about the edge $(v,w)$.
 
-Comparing REV-$v$ to REV-$w$, we see REV-$w$ performing better than REV-$v$, since we're trying to predict the existence of the edge from $w$ to $v$ given $(v,w)$, and it would appear that knowing about $w$ is a lot more valuable than knowing about $v$.
+Comparing REV-$v$ to REV-$w$, we see REV-$w$ obtains higher accuracy compared to REV-$v$, and this is because we're trying to predict the existence of the edge from $w$ to $v$ given $(v,w)$, and knowing about $w$ is a lot more valuable than knowing about $v$.
 
-Note that SYM$^-$, REV$^-$, REV$-w^+$ and REV-$v^-$ do so poorly that simply predicting that everything was reciprocated (or unreciprocated) would do better.
+Note that SYM$^-$, REV$^-$, REV$-w^+$ and REV-$v^-$ are such poor predictors that simply predicting that everything was reciprocated (or unreciprocated) would have been better.
 
 \subsubsection{Comparison of methods of prediction}
-\paragraph{Trends}
-On the whole, outdegree-indegree ratio and the two-step paths ratio are the best indicators of reciprocity.
 
-\paragraph{Larger is better?}
-When we look at features using one of the four mechanisms, the larger the value, the more likely it is for reciprocation to occur, and this is the case for a majority of features. For example, a 
-However,
-TODO Two-step paths $v$ to $w$.
-TODO Preferential attachment both ways.
+\paragraph{Trends}
+On the whole, outdegree-indegree ratio and the two-step paths ratio are the best indicators of reciprocity. In fact, outdegree-indegree ratio alone already achieves accuracy to within $\pm 5\%$ of a decision tree using every feature.
+
+\paragraph{Sending and receiving}
+When we look at features using one of the four mechanisms, the larger the value, the more likely it is for reciprocation to occur, and this is the case for a majority of features. For example, the \emph{larger} the indegree ratio, the more in-links $v$ has in relation to $w$, increasing the probability that $w$ will link to $v$, given that we know that $v$ already links to $w$.
+
+However, the \emph{smaller} the outdegree-indegree ratio, the more likely reciprocation occurs. In other words, a small numerator and a large denominator in $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} = \frac{\deg^+(v)\deg^-(w)}{\deg^-(v)\deg^+(w)}$ is a good indicator of reciprocation. And indeed, a large denominator indicates that $v$ has many in-links and $w$ has many out-links, both of which increase the probability that $w$ links to $v$.
+
+We can generalize this further: if we know that $v$ "receives" a lot of traffic and $w$ "sends" a lot of traffic, that naturally reciprocation between $w$ and $v$ is likely to occur.
+
+Interestingly, separating the numerator and denominator from the outdegree-indegree ratio above, which corresponds to our two preferential attachment features, results in two very different results. While a small numerator does decently well (preferential attachment ($v$ to $w$)), a large denominator does not (preferential attachment ($w$ to $v$)) and this only performs marginally above chance. <<TODO Why?>>
 
 \paragraph{REV-$v$ vs. REV-$w$}
-Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, the difference is not as significant. Analagous to whether you would want to know more about the features of a marketer ($v$) vs. a subscriber ($w$), knowing about the subscriber tells us more about the relationship between both.
+Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, the difference is not as significant. Analagous to whether you would want to know more about the features of a marketer ($v$) vs. a subscriber ($w$), knowing about the subscriber tells us more about the relationship between both. <<Expand>>
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -374,7 +379,7 @@ Outdegree-indegree (w) & 0.747 (50) & 0.777 \\
 
 \subsection{Decision tree analysis}
 
-We then combined subsets of features and evaluated their performance, by splitting the edges in $E^r_10 \cup E_10^u$ randomly into two sets, training on one and evaluating on the other.
+We then combined subsets of features and evaluated their performance, by splitting the edges in $E^r_10 \cup E_10^u$ randomly into two sets, training on one set and evaluating on the other.
 
 The following combined subsets, in addition to each individual subset, were considered:
 \begin{enumerate}
