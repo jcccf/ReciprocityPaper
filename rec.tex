@@ -538,37 +538,65 @@ Preferential attachment ($w$ to $v$)  &  - & -  \\
 \subsection{(Un)reciprocated subgraph analysis}
 We also analyzed how various properties of the subgraphs $G_n$, as well as the edge sets $E^r_k$ and $E^u_k$ varied as we adjusted $n$ and $k$.
 
-\paragraph{Reciprocated and unreciprocated edges} we notice that the frequency of reciprocated edges is approximately 2 to 3 times that of unreciprocated edges, and the proportion of reciprocated edges increases as $n$ and $k$ increases (Fig. \ref{fig_rur_propne}). While reciprocated communication is the dominant form of interaction, we see a significant number of "unreciprocated" interaction, indicating that a significant number of relationships on Twitter are unbalanced. This could occur when a user of lower status tries to get the attention of a more influential user (of higher status) by messaging him or her (e.g. when a fan messages a celebrity multiple times hoping to get a reply). 
+\paragraph{Reciprocated and unreciprocated edges} we notice that the frequency of reciprocated edges is approximately 2 to 3 times that of unreciprocated edges, and the proportion of reciprocated edges increases as $n$ and $k$ increases (Fig. \ref{fig_rur_propn}, \ref{fig_rur_propk}). While reciprocated communication is the dominant form of interaction, we see a significant number of "unreciprocated" interaction, indicating that a significant number of relationships on Twitter are unbalanced. This could occur when a user of lower status tries to get the attention of a more influential user (of higher status) by messaging him or her (e.g. when a fan messages a celebrity multiple times hoping to get a reply). 
 
 \paragraph{Reciprocated and unreciprocated nodes} a majority of nodes have reciprocated relationships, with a small proportion having only unreciprocated relationships. A significant proportion of nodes take part in both reciprocated and unreciprocated relationships - indicating that while there are two distinct types of relationships occuring on Twitter, this does not correspond to two distinct types of users. A reason that "unreciprocated" Twitter users are not common might be that social, and hence reciprocated relationships are the driving factor of active, continued use of the platform. 
 
 We can also see this in Fig. \ref{fig_rur_sca2}, a scatter plot of the number of users with each of 3 types of interaction - 1 reciprocated and 2 unreciprocated, as an unreciprocal interaction is by definition asymmetric. We differentiate between both ends in an unreciprocated edge ($v \xrightarrow{k} w$ and $w \xrightarrow{0} v$), where where a user could be $v$ if she's not replied to, or $w$ if she doesn't reply. The most common type of nodes are those which only have reciprocated edges, with a lot less having some unreciprocal interactions of some type.
 
-\paragraph{Clustering coefficient remains relatively stable as $n$, $k$ vary, and the graphs corresponding to $E_k^r$ and $E_k^u$ are connected} this demonstrates that the network properties of these subgraphs do not change significantly even if we sample from a relatively smaller population of all users (Fig. \ref{fig_rur_cc},\ref{fig_rur_lcc}).
+\paragraph{Clustering coefficient remains relatively stable as $n$, $k$ vary} this demonstrates that the network properties of these subgraphs do not change significantly even if we sample from a relatively smaller population of all users (Fig. \ref{fig_rur_cc_n},\ref{fig_rur_cc_k}).
+
+\paragraph{Connected component remains stable as $n$ varies, but decreases as $k$ increases.} The graphs corresponding to $E_k^r$ and $E_k^u$ are connected for relatively low values of $k$ and decreases as $k$ increases. <<TODO Something interesting about this?>> (Fig. \ref{fig_rur_lcc_n},\ref{fig_rur_lcc_k}).
 
 \begin{figure}[!t]
 \centering
-\subfloat[Varying $n$]{\includegraphics[width=1.5in]{proportion_edgesnodes_n}}                
-\subfloat[Varying $k$]{\includegraphics[width=1.5in]{proportion_edgesnodes_k}}
-\caption{Proportion of nodes or edges}
-\label{fig_rur_propne}
+\includegraphics[width=2.5in]{proportion_edgesnodes_n}                
+\caption{Proportion of nodes or edges (varying $n$)}
+\label{fig_rur_propn}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\subfloat[Varying $n$]{\includegraphics[width=1.5in]{average_clustering_n}}                
-\subfloat[Varying $k$]{\includegraphics[width=1.5in]{average_clustering_k}}
-\caption{Clustering coefficient}
-\label{fig_rur_cc}
+\includegraphics[width=2.5in]{proportion_edgesnodes_k}                
+\caption{Proportion of nodes or edges (varying $k$)}
+\label{fig_rur_propk}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\subfloat[Varying $n$]{\includegraphics[width=1.5in]{proportion_largestcc_n}}                
-\subfloat[Varying $k$]{\includegraphics[width=1.5in]{proportion_largestcc_k}}
-\caption{Proportion in largest connected component}
-\label{fig_rur_lcc}
+\includegraphics[width=2.5in]{average_clustering_n}          
+\caption{Clustering coefficient (varying $n$)}
+\label{fig_rur_cc_n}
 \end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=2.5in]{average_clustering_k}      
+\caption{Clustering coefficient (varying $k$)}
+\label{fig_rur_cc_k}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=2.5in]{proportion_largestcc_n}
+\caption{Proportion in largest connected component (varying $n$)}
+\label{fig_rur_lcc_n}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=2.5in]{proportion_largestcc_k}
+\caption{Proportion in largest connected component (varying $k$)}
+\label{fig_rur_lcc_k}
+\end{figure}
+
+%\begin{figure}[!t]
+%\centering
+%\subfloat[Varying $n$]{\includegraphics[width=1.5in]{proportion_largestcc_n}}                
+%\subfloat[Varying $k$]{\includegraphics[width=1.5in]{proportion_largestcc_k}}
+%\caption{Proportion in largest connected component}
+%\label{fig_rur_lcc}
+%\end{figure}
 
 \begin{figure}[!t]
 \centering
