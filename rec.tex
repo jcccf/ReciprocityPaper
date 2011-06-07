@@ -83,7 +83,7 @@ It would appear that predicting symmetry in the relation between nodes is more d
 
 We consider the subgraphs of the form $G_n = (V_n, E_n)$, where $V_n = \{v~|~v \in V, v \text{ sent } \ge n \text{ messages}\}$ and $E_n = \{e=(v,w)~|~e \in E,~v \text{ and } w \in V_n\}$.
 
-We also define $v \xrightarrow{k} w$, which means $v$ sent $w$ $k$ messages. 
+We also define $v \xrightarrow{k} w$, which means $v$ sent $\ge w$ $k$ messages. 
 From this definition we can formalize reciprocity in terms of $k$. 
 We define an edge $(v,w)$ to be reciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and unreciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{0} v$.
 
@@ -271,8 +271,8 @@ Jaccard's coefficient (out) & $\frac{|\Gamma^+(v) \cap \Gamma^+(w)|}{|\Gamma^+(v
 \hline
 Adamic/Adar & $\sum_{\{x|x \in \Gamma^-(v) \cap \Gamma^-(w)\}} \frac{1}{\log{\deg^-(x)}}$ \\
 \hline
-Preferential attachment ($v$ to $w$) & $\deg^+(v)\cdot \deg^+(w)$ \\
-Preferential Attachment ($w$ to $v$) & $\deg^-(v)\cdot \deg^-(w)$ \\
+Preferential attachment ($v$ to $w$) & $\deg^+(v)\cdot \deg^-(w)$ \\
+Preferential Attachment ($w$ to $v$) & $\deg^+(w)\cdot \deg^-(v)$ \\
 \hline
 Two-step paths ($v$ to $w$) & $ |\operatorname{paths}^2(v,w)|$ \\
 Two-step paths ($w$ to $v$) & $ |\operatorname{paths}^2(w,v)|$ \\
@@ -317,8 +317,6 @@ For example, the \emph{larger} the indegree ratio, the more in-links $v$ has in 
 However, the \emph{smaller} the outdegree-indegree ratio, the more likely reciprocation occurs. 
 In other words, a small numerator and a large denominator in $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} = \frac{\deg^+(v)\deg^-(w)}{\deg^-(v)\deg^+(w)}$ is a good indicator of reciprocation. 
 And indeed, a large denominator indicates that $v$ has many in-links and $w$ has many out-links, both of which increase the probability that $w$ links to $v$.
-
-We can generalize this further: if we know that $v$ ``receives'' a lot of traffic and $w$ ``sends'' a lot of traffic, that naturally reciprocation between $w$ and $v$ is likely to occur.
 
 Interestingly, separating the numerator and denominator from the outdegree-indegree ratio above, which corresponds to our two preferential attachment features, results in two very different results. 
 While a small numerator does decently well (preferential attachment ($v$ to $w$)), a large denominator does not (preferential attachment ($w$ to $v$)) and this only performs marginally better than chance. <<TODO Why?>>
@@ -383,8 +381,8 @@ Adamic/Adar & 1.94 (55) & 0.561 \\
 \hline
 Two-step paths ($v$ to $w$) & 6 (59) & 0.517* \\
 Two-step paths ($w$ to $v$) & 5 (51) & 0.657 \\
-Two-step paths ratio (directed) & 0.556 (52) & 0.760 \\
-Two-step paths ratio (undirected) & 0.259 (34) & 0.516 \\
+Two-step paths ratio & 0.556 (52) & 0.760 \\
+% Two-step paths ratio (undirected) & 0.259 (34) & 0.516 \\
 \hline
 Preferential attachment ($v$ to $w$) & 10230 (58) & 0.687* \\
 Preferential attachment ($w$ to $v$) & 2610 (37) & 0.534* \\
@@ -424,7 +422,7 @@ Outdegree-indegree (w) & 0.747 (50) & 0.777 \\
 
 \subsection{Decision tree analysis}
 
-We then combined subsets of features and evaluated their performance, by splitting the edges in $E^r_{10} \cup E_{10}^u$ randomly into two sets, training on one set and evaluating on the other.
+We then combined subsets of features and evaluated their performance, by splitting the edges in $E^r_{10} \cup E_{10}^u$ randomly into two sets, training on one set and evaluating on the other. The ID3 algorithm was used, and because $\operatorname{val}$ is continuous, we split each into deciles (dividing the data equally into tenths) to reduce computation time.
 
 The following combined subsets, in addition to each individual subset, were considered:
 \begin{enumerate}
@@ -443,7 +441,7 @@ The following combined subsets, in addition to each individual subset, were cons
 \hline
 Degree/message (1) & 0.828 & Outdegree-indegree (w) \\
 Degree/message ratio (2) & 0.861 & Outdegree-indegree ratio \\
-Two step hops (3) & 0.795 & Two-step paths ($w$ to $v$) \\
+Two-step hops (3) & 0.795 & Two-step paths ($w$ to $v$) \\
 Link prediction (4) & 0.742 & Two-step paths ratio (directed) \\
 \hline
 \multicolumn{3}{|c|}{\emph{Combined}} \\
@@ -455,7 +453,7 @@ All (1-4) & 0.861 & Outdegree-indegree ratio \\
 \end{tabular}
 \end{table}
 
-We notice that the accuracy when we only use degree/message features compared to that when we include all features is the same. 
+We notice that the accuracy when we only use degree/message features compared to that when we include all features is the same. And although we observe that the two step paths ratio obtains an accuracy of 0.760 on its own while the decision tree for link prediction only manages 0.742, this can be attributed to the inaccuracy introduced splitting each continuous variable into 10 discrete portions.
 
 Whenever the outdegree-indegree value or ratio was included as an attribute, it became the most important.
 
@@ -521,7 +519,7 @@ Mutual Neighbors (out) & 0.0147103  & $< 2 \e{-16} $\\
 Two-step paths ($v$ to $w$)  &  \bf{-0.0530463}   & $< 2 \e{-16} $\\
 Two-step paths ($w$ to $v$)   &    0.0182572   & $< 2 \e{-16} $\\
 \hline
-Two-step paths (directed)  &   \bf{0.0394657} & $< 2 \e{-16} $\\
+Two-step paths ratio  &   \bf{0.0394657} & $< 2 \e{-16} $\\
 Jaccard (in) & -0.0238541 & $< 2 \e{-16} $\\
 Jaccard (out) &   \bf{0.0572358}  & $< 2 \e{-16} $\\
 Adamic-Adar  &    -0.0001424 & \sout{0.881637} \\
