@@ -61,7 +61,7 @@ In fact, using only simple properties that relate to the degree of a node or the
 Reciprocity prediction and link prediction are inherently different problems --- while the link prediction task is about predicting the occurrence of rare events, reciprocity prediction estimates the ``balance'' of a relationship.
 
 \subsection{Related work}
-Tyler and Tang~\cite{TylerTang} showed that reciprocity 
+Tyler and Tang~\cite{Tyler:2003tq} showed that reciprocity 
 To be written.
 
 \subsection{Twitter as a domain to analyze}
@@ -429,7 +429,7 @@ Outdegree-indegree (w) & 0.747 (50) & 0.777 \\
 
 \subsection{Decision tree analysis}
 
-We then combined subsets of features and evaluated their performance, by splitting the edges in $E^r_{10} \cup E_{10}^u$ randomly into two sets, training on one set and evaluating on the other. The ID3 algorithm was used, and because $\operatorname{val}$ is continuous, we split each into deciles (dividing the data equally into tenths) to reduce computation time.
+We then combined subsets of features and evaluated their performance by splitting the edges in $E^r_{10} \cup E_{10}^u$ randomly into two sets and performing 2-fold cross-validation. The ID3 algorithm was used, and because $\operatorname{val}$ is continuous, we split each into deciles (dividing the data equally into tenths) to reduce computation time.
 
 The following combined subsets, in addition to each individual subset, were considered:
 \begin{enumerate}
@@ -446,21 +446,21 @@ The following combined subsets, in addition to each individual subset, were cons
 \hline
 \bf{Set} & Accuracy & Top-level attribute \\
 \hline
-Degree/message (1) & 0.828 & Outdegree-indegree (w) \\
+Degree/message (1) & 0.832 & Outdegree-indegree (w) \\
 Degree/message ratio (2) & 0.861 & Outdegree-indegree ratio \\
-Two-step hops (3) & 0.795 & Two-step paths ($w$ to $v$) \\
-Link prediction (4) & 0.742 & Two-step paths ratio (directed) \\
+Two-step hops (3) & 0.796 & Two-step paths ($w$ to $v$) \\
+Link prediction (4) & 0.739 & Two-step paths ratio (directed) \\
 \hline
 \multicolumn{3}{|c|}{\emph{Combined}} \\
 \hline
 All ratio (2,3,4) & 0.861 & Outdegree-indegree ratio \\
 All absolute (1,3,4) & 0.828 & Outdegree-indegree (w) \\
-All (1-4) & 0.861 & Outdegree-indegree ratio \\
+All (1-4) & 0.862 & Outdegree-indegree ratio \\
 \hline
 \end{tabular}
 \end{table}
 
-We notice that the accuracy when we only use degree/message features compared to that when we include all features is the same. And although we observe that the two step paths ratio obtains an accuracy of 0.760 on its own while the decision tree for link prediction only manages 0.742, this can be attributed to the inaccuracy introduced splitting each continuous variable into 10 discrete portions.
+We notice that the accuracy when we only use degree/message features compared to that when we include all features is the same. And although we observe that the two step paths ratio obtains an accuracy of 0.760 on its own while the decision tree for link prediction only manages 0.739, this can be attributed to the inaccuracy introduced splitting each continuous variable into 10 discrete portions.
 
 Whenever the outdegree-indegree value or ratio was included as an attribute, it became the most important.
 
