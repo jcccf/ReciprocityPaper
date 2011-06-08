@@ -61,44 +61,45 @@ In fact, using only simple properties that relate to the degree of a node or the
 Reciprocity prediction and link prediction are inherently different problems --- while the link prediction task is about predicting the occurrence of rare events, reciprocity prediction estimates the ``balance'' of a relationship.
 
 \subsection{Related work}
-Tyler and Tang showed that reciprocity 
-http://www.hpl.hp.com/research/idl/papers/rhythms/ECSCWFinal.pdf
+Tyler and Tang~\cite{TylerTang} showed that reciprocity 
 To be written.
 
 \subsection{Twitter as a domain to analyze}
 Twitter is a good domain to explore the superposition of the reciprocated and unreciprocated networks. 
 The reciprocated network consists of mainly mutual interactions between friends or people in the same social circle, while the unreciprocated network consists of interactions between individuals in different social circles. 
-We can also relate these types of interactions to the concept of status - where people with similar status participate in reciprocal interactions (e.g. messages between friends), while those with dissimilar status participate in unreciprocal interactions (e.g. messages from fans to celebrities).
+We can also relate these types of interactions to the concept of status - where people with similar status participate in reciprocal interactions (e.g. messages between friends), while those with dissimilar status participate in unreciprocated interactions (e.g. messages from fans to celebrities).
 
 \subsection{Problem definition}
-The input to our prediction problem is a graph $G=(V,E)$ and a node pair $\{v,w\}$, where $v,w \in V$ but all edges between $v$ and $w$ removed. 
-Our task is to predict the direction of edges between $v$ and $w$.
-
-The problem of predicting reciprocation can be defined in two ways. 
-In the first, we decide whether both $(v,w)$ and $(w,v)$ exist (bidirected/symmetric), or only one of $(v,w)$, $(w,v)$ exists (asymmetry), given that at least one edge exists between $v$ and $w$. 
-In the second, we decide whether $(w,v)$ exists given an edge $(v,w)$. 
-It would appear that predicting symmetry in the relation between nodes is more difficult than predicting reciprocation in a specific direction, and we show that this is indeed the case.
+We are generally interested in determining whether a relationship is reciprocated.
+The input to our prediction problem is a directed graph $G=(V,E)$ and a node pair $\{v,w\}$, where $v,w \in V$ but all edges between $v$ and $w$ removed. 
+Our task is to predict the direction of edges between $v$ and $w$, and we see that the problem of predicting reciprocation can be defined in two ways. 
+First, we consider the formulation in which we decide whether a $\{v,w\}$ relationship is symmetric (that is, both $(v,w)$ and $(w,v)$ exist) or is asymmetric (only one of the directed $(v,w)$, $(w,v)$ relationship exists).
+We make this prediction under the assumption that at least one directed edge exists between $v$ and $w$. 
+In the second formulation, we ask whether $(w,v)$ exists given that there is the $(v,w)$ edge. 
+It would appear that predicting a symmetric relationship between nodes is a more difficult task than predicting reciprocation in a specific direction, and we show that this is indeed the case.
 
 \subsection{Notation}
-
+The number of messages users author in Twitter exhibits a long-tail distribution; many users produce only a small number of messages.
+In this work, we will focus on users who have produced a large number of @-messages.
 We consider the subgraphs of the form $G_n = (V_n, E_n)$, where $V_n = \{v~|~v \in V, v \text{ sent } \ge n \text{ messages}\}$ and $E_n = \{e=(v,w)~|~e \in E,~v \text{ and } w \in V_n\}$.
-
-We also define $v \xrightarrow{k} w$, which means $v$ sent $\ge w$ $k$ messages. 
+This subgraph captures the @-messaging interactions between users who are prolific Twitter users.
+We use the notation $v \xrightarrow{k} w$ to indicate that $v$ sent at least $k$ @-messages to $w$. 
 From this definition we can formalize reciprocity in terms of $k$. 
-We define an edge $(v,w)$ to be reciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and unreciprocated if $v \xrightarrow{k} w$ and $w \xrightarrow{0} v$.
-
-Let the set of reciprocated edges be \(E_k^r = \{ (v,w) : v \xrightarrow{k} w \text{ and } w \xrightarrow{k} v \} \), and the set of unreciprocated edges be \(E_k^u = \{ (v,w) : v \xrightarrow{k} w\}\) .
-
-Let $\deg^-(v)$ and $\deg^+(v)$ be the indegree and outdegree of node $v$ respectively, $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ be the messages received and sent by a node $v$, and $\Gamma^-(v) = \{w| (w,v) \in E\}$, or the set of people who send messages to $v$.
+We say that an edge $(v,w)$ is reciprocated if both $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and unreciprocated if only $v \xrightarrow{k} w$.
+Let the set of reciprocated edges be \(E_k^r = \{ (v,w) : v \xrightarrow{k} w \text{ and } w \xrightarrow{k} v \} \), and the set of unreciprocated edges be \(E_k^u = \{ (v,w) : v \xrightarrow{k} w\}\).
+Finally, let $\deg^-(v)$ and $\deg^+(v)$ respectively denote the indegree and outdegree of node $v$, $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ be the messages received and sent by $v$, and $\Gamma^-(v) = \{w| (w,v) \in E\}$ be set of people who send messages to $v$.
 
 \section{Dataset description}
-We extract the @-message graph from a large crawl of Twitter that took place between August 2009 and January 2010.
+% TODO: Cite our other paper here for details about the data collection
+We extract the \emph{@-message graph} from a large crawl of Twitter that took place between August 2009 and January 2010.
 More than three-billion messages from over 60 million users were collected.  
-The graph $G = (V,E)$ of users who authored at least one @-message contains 12,795,683 unique users ($|V|$) who sent a total of 819,305,776 @-messages, with 156,868,257 unique directed interactions ($|E|$). 
+The @-message graph is constructed by looking at Tweets a user $v$ authors which mention user $w$ at the beginning of the Tweet.  
+The graph $G = (V,E)$ of users who authored at least one @-message contains 12,795,683 unique users who sent a total of 819,305,776 @-messages, with 156,868,257 unique directed interactions. 
 
 We focus our analysis on the subgraph $G_{1000}$, the subgraph induced by users who authored at least 1000 @-messages. 
-Furthermore, we only consider an edge $(v,w)$ to be present if at least 10 @-messages were sent from $v$ to $w$.
-In $G_{1000}$, we find $|E^r_{10}| = 797,342$, $|E^u_{10}| = 349,258$.
+Furthermore, we only consider an edge $(v,w)$ to be present if at least 10 @-messages were sent from $v$ to $w$ (in our notation, $v \xrightarrow{10} w$).
+In $G_{1000}$, we find that $|E^r_{10}| = 797,342$, $|E^u_{10}| = 349,258$.
+HOW MANY USERS WAS THIS?
 
 \section{Methods for Reciprocity Prediction}
 Intuitively, features can measure whether $v$ and $w$ have similar status or a similar social circle, and both are potentially useful in predicting reciprocation. 
