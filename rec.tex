@@ -152,25 +152,22 @@ It is not intuitive whether methods that work well for link prediction would wor
 While link prediction asks whether an edge could exist between two nodes, reciprocity prediction asks whether a known directed-edge is actually bidirectional.
 The following are some measures used in the link-prediction task:
 
-\emph{Mutual neighbors} calculates the number of people to whom both $v$ and $w$ send messages ($|\Gamma^+(v) \cap \Gamma^+(w)|$), or the number of people from whom both $v$ and $w$ receive messages ($|\Gamma^-(v) \cap \Gamma^-(w)|$).
+\emph{Newman} \cite{graph:common-neighbors} showed that the number of common neighbors in a collaboration network can be a preditor of future links. \emph{Mutual neighbors} calculates the number of people to whom both $v$ and $w$ send messages ($|\Gamma^+(v) \cap \Gamma^+(w)|$), or the number of people from whom both $v$ and $w$ receive messages ($|\Gamma^-(v) \cap \Gamma^-(w)|$).
 
-\emph{Jaccard's coefficient} is also based on the concept of mutual neighbors, calculates the similarity between two sets by taking the ratio of the cardinality of their intersection and their union: \[\operatorname{val}(v,w) = \frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)|}.\]
+\emph{Jaccard's coefficient} \cite{Salton:86} is a similarity measure that we apply to the concept of mutual neighbors, we calculate the similarity between two sets by taking the ratio of the cardinality of their intersection and their union: \[\operatorname{val}(v,w) = \frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)|}.\]
 
 \emph{Adamic and Adar} \cite{Adamic:2003ud} defined the similarity between web sites $v,w$ to be $ \sum_{\{x|v,w \text{ share feature }x\}} \frac{1}{\log{\text{frequency}(x)}} $, and we similarly define $\operatorname{val}(v,w)$ to be \[ \sum_{\{x|x \in \Gamma^-(v) \cap \Gamma^-(w)\}} \frac{1}{\log{\deg^-(x)}} .\]
 
-\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. 
-Here, $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^+(w)$, or $\deg^+(v)\cdot \deg^-(w)$. 
+\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. Newman \cite{graph:common-neighbors} and Barabasi et al. \cite{Barabasi:2002} showed that the product of the in degree of two nodes in a co-authorship network can be a predictor of a future link between the nodes. Here, we apply prefferential attachement in a slightly different way,  $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^+(w)$, or $\deg^+(v)\cdot \deg^-(w)$. 
 Notice that taking the ratio of these two values is equivalent to the outdegree/indegree ratio between two nodes.
 
 \emph{Two-step paths (ratio)} is a simplification of Katz's \cite{Katz:1953un} measure of status by calculating the number of paths between two nodes. 
 In this work, we only consider paths of length 2, and define $\operatorname{val}(v,w) = \operatorname{paths}^2(v,w)|$, where $\operatorname{paths}^2(v,w)$ is the set of paths from $v$ to $w$ of length $2$. 
 The two-step paths ratio is simply the ratio of number of two-step paths from $v$ to $w$ to that from $w$ to $v$. 
 
-TODO I can also calculate that in the case where you predict a reverse edge, you use the path from $v$ to $w$ in your calculation, thus adding a single on-step path to the calculation. 
-But this ends up being worse, so probably it's not important to include.
 
 \subsection{Different sets of features}
-We examine several additional features, and for convenience, we further break these down into four sets of features:
+The features above have been shown to work well for the related but different task of predicting the exitence of a link. Since our task is to predict whether a link is reciprocated we also we examine several additional features, and for convenience, we further break these down into four sets:
 \begin{enumerate}
 	\item Absolute degree/message features - degree, messages, message-degrees, outdegree-indegrees
 	\item Relative degree/message features - degree ratios, message ratios, message-degree ratios, and outdegree-indegree ratios
@@ -306,7 +303,7 @@ In table \ref{table_recresults_indeg}, SYM$^+$ refers to the prediction mechanis
 \subsubsection{Comparison of prediction mechanisms}
 We observe higher accuracy for the REV task than SYM, as REV is ``easier" than SYM since you know more information about the edge $(v,w)$.
 
-Comparing REV-$v$ to REV-$w$, we see REV-$w$ obtains higher accuracy compared to REV-$v$, and this is because we're trying to predict the existence of the edge from $w$ to $v$ given $(v,w)$, and knowing about $w$ is a lot more valuable than knowing about $v$.
+Comparing REV-$v$ to REV-$w$, we see REV-$w$ obtains higher accuracy compared to REV-$v$. This suggests that when trying to predict the existence of the edge from $w$ to $v$ given $(v,w)$, knowing about properties of $w$ is more valuable than knowing properties of $v$.
 
 Note that SYM$^-$, REV$^-$, REV$-w^+$ and REV-$v^-$ are such poor predictors that simply predicting that everything was reciprocated (or unreciprocated) would have been better.
 
@@ -322,10 +319,10 @@ For example, the \emph{larger} the indegree ratio, the more in-links $v$ has in 
 
 However, the \emph{smaller} the outdegree-indegree ratio, the more likely reciprocation occurs. 
 In other words, a small numerator and a large denominator in $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} = \frac{\deg^+(v)\deg^-(w)}{\deg^-(v)\deg^+(w)}$ is a good indicator of reciprocation. 
-And indeed, a large denominator indicates that $v$ has many in-links and $w$ has many out-links, both of which increase the probability that $w$ links to $v$.
+And indeed, a large denominator and small numerator indicates that $v$ has many in-links and few out-links and that $w$ has many out-links and few in-links. This suggests that $v$ has higher ``status" than $w$ and hence increases the probability that $w$ links to $v$.
 
 Interestingly, separating the numerator and denominator from the outdegree-indegree ratio above, which corresponds to our two preferential attachment features, results in two very different results. 
-While a small numerator does decently well (preferential attachment ($v$ to $w$)), a large denominator does not (preferential attachment ($w$ to $v$)) and this only performs marginally better than chance. <<TODO Why?>>
+While a small numerator does decently well (preferential attachment ($v$ to $w$)), a large denominator does not (preferential attachment ($w$ to $v$)) and this only performs marginally better than chance. It is reasonable that the numerator and denotimatior individially perform worse than the ratio, since the ratio takes into account both of them. However, the fact that the denominator performs so poorly is very surprising because a large denominator indicates that $v$ has a higher status than $w$ but it also causes a higher change that $w$ links to $v$ even if $w$ were to pick who to link to at random. On the other hand, a small numerator makes a statement about status but not about higher changes of reciprocation under a random process. The fact that a small numerator is more important than a large denominator suggests that status (measured by the number of in and out links) is a very powerful preditor for reciprocity.
 
 \paragraph{REV-$v$ vs. REV-$w$}
 Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, the difference is not as significant [be more specific about significance?]. 
@@ -459,7 +456,7 @@ All (1-4) & 0.862 & Outdegree-indegree ratio \\
 \end{tabular}
 \end{table}
 
-We notice that the accuracy when we only use degree/message features compared to that when we include all features is the same. And although we observe that the two step paths ratio obtains an accuracy of 0.760 on its own while the decision tree for link prediction only manages 0.739, this can be attributed to the inaccuracy introduced splitting each continuous variable into 10 discrete portions.
+Table \ref{Decision Tree Accuracy} shows the accuracy of the trees and their most important attribute for the different sets of features. We notice that the accuracy when we only use degree/message features compared to that when we include all features is the same. And although we observe that the two step paths ratio obtains an accuracy of 0.760 on its own while the decision tree for link prediction only manages 0.739, this can be attributed to the inaccuracy introduced splitting each continuous variable into 10 discrete portions. Furthemore, we notice that the features that are commonly used for link prediction yield a tree of lower accuracy than other features. This shows that the problem of prediction reciprocation is different predicting reciprocation.  
 
 Whenever the outdegree-indegree value or ratio was included as an attribute, it became the most important.
 
