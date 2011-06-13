@@ -39,10 +39,18 @@ anon@whoare.you}}
 
 \begin{abstract}
 %\boldmath
-In this paper we investigate methods of predicting reciprocity in social networks, and use decision trees and regression models to determine good indicators of reciprocity. 
-We extract a network based on directed @-messages sent between users in Twitter, and discover that the ratio of a node's outdegree to its indegree is the best predictor of reciprocity.  
-Moreover, we find that heuristics used in link prediction do not necessarily perform well in reciprocity prediction. 
-In fact, using only simple properties that relate to the degree of a node or the number of messages that it sends or receives is sufficient in obtaining maximum accuracy in this prediction <<rephrase?>>.
+In this paper we investigate methods of predicting reciprocity in
+on-line social networks, and we use decision trees and regression models to
+determine good indicators of reciprocity.  
+We extract a network based
+on directed @-messages sent between users in Twitter, and discover
+that measures based on the characteristics of nodes and their
+network neighborhoods can be used to construct good predictors
+of reciprocity.
+Moreover, we find that reciprocity prediction forms interesting
+contrasts with earlier network prediction tasks, including
+link prediction, as well as the inference of strengths and signs
+of network links.
 \end{abstract}
 
 % no keywords
@@ -58,47 +66,171 @@ In fact, using only simple properties that relate to the degree of a node or the
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-Reciprocity prediction and link prediction are inherently different problems --- while the link prediction task is about predicting the occurrence of rare events, reciprocity prediction estimates the ``balance'' of a relationship.
+
+As social media applications becomes richer and more complex,
+they come to contain a wide range of different types of 
+connections among their users.
+An important source of variation is exhibited by the
+microblogging site Twitter, where communication links
+(for our purposes, @-messages directed from one user to another)
+can represent many different forms of interaction.
+Indeed, earlier research has shown that Twitter contains
+a large amount of social activity between users who interact
+with each other as peers, and also a large amount of information-seeking
+and information-sharing activity in which users interact with
+celebrities, news sources, and other types of high-visibility accounts
+\cite{kwak-what-is-twitter,romero-directed-closure}.
+
+The challenge, when studying an environment such as Twitter,
+is that all of these types of connections are superimposed 
+in a single communication network.
+As a result, it is important to develop techniques capable of dissecting
+the links of the underlying network into these fundamentally
+different forms of activity.
+Here we develop a set of techniques for this purpose,
+by formulating and studying the problem of predicting
+{\em reciprocity} in linking.
+
+Reciprocity captures a basic way in which different forms of
+interaction on a site like Twitter take place.
+When two users $v$ and $w$ interact as peers, one expects that @-messages
+will flow in each direction between them --- we consider
+this to be a {\em symmetric}, or {\em reciprocal}, interaction.
+On the other hand, if a user $v$ sends multiple messages to a
+celebrity or news source $w$, it is likely that $w$ will never
+send messages in return --- this is an
+{\em asymmetric}, or {\em unreciprocated} interaction.
+What characterizes the difference between reciprocated and
+unreciprocated relationships?  Can we tell them apart based on
+characteristics of the users involved, and their neighborhoods
+in the network?
+Do the sub-networks of reciprocated and unreciprocated links have
+different structural properties?
+These are some of the questions we address in this paper, as an
+approach for addressing the broader issue of isolating the different
+forms of interaction that take place in a complex social media 
+site such as Twitter.
+
+\subsection{Summary of Results}
+
+We pursue two main approaches to analyzing reciprocity.
+The first is the problem of reciprocity prediction:
+we formulate several variants of the problem, all of them
+oriented around determining whether a link between users $v$ and $w$
+is reciprocated or unreciprocated.
+We identify a set of features based on the characteristics of $v$ and $w$,
+and of nodes connected to $v$ and $w$, that have strong predictive
+value for this task.
+We find that differences in reciprocity can be related to the 
+notion of status --- roughly speaking,
+people with similar status often participate in reciprocal
+interactions (e.g. messages between friends), while those with
+dissimilar status often participate in unreciprocated interactions (e.g.
+messages from fans to celebrities).
+In particular, we find that measures formalizing the 
+relative ``flow'' of links from $v$ to $w$,
+compared with the corresponding flow from $w$ to $v$, constitute
+an important source of information for this task.
+
+The second main issue we consider is the structural comparison
+of the subgraphs consisting entirely of reciprocated links and
+entirely of unreciprocated links.
+We find that they exhibit important differences, including 
+greater clustering and a larger giant component in the
+subgraph of reciprocated links.
+Moreover, we find that almost all highly active Twitter users
+take part in at least some reciprocated interactions, 
+while a non-trivial fraction take part in no unreciprocated interactions.
 
 \subsection{Related work}
-Tyler and Tang~\cite{Tyler:2003tq} showed that reciprocity 
-To be written.
 
-\subsection{Twitter as a domain to analyze}
-Twitter is a good domain to explore the superposition of the reciprocated and unreciprocated networks. 
-The reciprocated network consists of mainly mutual interactions between friends or people in the same social circle, while the unreciprocated network consists of interactions between individuals in different social circles. 
-We can also relate these types of interactions to the concept of status - where people with similar status participate in reciprocal interactions (e.g. messages between friends), while those with dissimilar status participate in unreciprocated interactions (e.g. messages from fans to celebrities).
+As noted above, several recent papers have discussed the 
+heterogeneity of relationship types on Twitter,
+though without consider reciprocity as a measure
+\cite{kwak-what-is-twitter,romero-directed-closure}.
+In the context of email, Tyler and Tang considered the dynamics
+of replying in email, which is the analogue of reciprocation
+in that domain \cite{Tyler:2003tq}; the specifics of their
+analysis are quite different from what we pursue here.
 
-\subsection{Problem definition}
-We are generally interested in determining whether a relationship is reciprocated.
+Reciprocity prediction is related to other predictive tasks
+concerned with the links of a network, though it is different in
+important ways.
+Specifically, the {\em link prediction problem} seeks to identify
+links $(v,w)$ that are currently not present in a network snapshot,
+but which are likely to form in the near future
+\cite{liben-nowell-link-pred}.
+A key contrast between reciprocity prediction and link prediction
+is that the formation of any particular link is a rare event,
+whereas the reciprocation of an existing link $(v,w)$ by
+the reverse edge $(w,v)$ is quite common on sites such as Twitter.
+For this and other reasons, we see in our analysis that the
+types of features that have been found to work well for link 
+prediction are not the ones that are most effective for 
+reciprocity prediction.
+
+There has also been recent research predicting the 
+{\em strengths} \cite{gilbert-tie-strength} and the 
+{\em signs} \cite{leskovec-chi10} of links in an on-line social network.
+These too form interesting contrasts with reciprocity prediction.
+In particular, it is possible for a strong directed tie to be
+either reciprocated or unreciprocated.  (For example, an avid
+follower of the New York Times might regular generate tweets
+that say things such as, ``@nytimes reports that ... '' without
+ever receiving a message from the @nytimes Twitter account.)
+There is also a connection to the problem of sign prediction in that
+notions of status are crucial there too \cite{leskovec-chi10},
+but there are important distinctions in that reciprocated and
+unreciprocated links can easily exhibit either type of sign.
+
+\section{Problem definition}
+
+We now formalize the problem of predicting reciprocation.
 The input to our prediction problem is a directed graph $G=(V,E)$ and a node pair $\{v,w\}$, where $v,w \in V$ but all edges between $v$ and $w$ removed. 
-Our task is to predict the direction of edges between $v$ and $w$, and we see that the problem of predicting reciprocation can be defined in two ways. 
-First, we consider the formulation in which we decide whether a $\{v,w\}$ relationship is symmetric (that is, both $(v,w)$ and $(w,v)$ exist) or is asymmetric (only one of the directed $(v,w)$, $(w,v)$ relationship exists).
+We use an @-message from $v$ to $w$ as an indication of a directed
+$(v,w)$ link (rather than other indications, such as the fact
+that $v$ follows $w$) --- this is in keeping with our focus 
+on communication activities.
+Our task at a general level
+is to predict the direction of edges between $v$ and $w$, and we note
+that this can be formalized in two distinct ways.
+First, we consider a formulation in which we decide whether a $\{v,w\}$ relationship is symmetric (that is, both $(v,w)$ and $(w,v)$ exist) or is asymmetric (only one of the directed $(v,w)$, $(w,v)$ relationship exists).
 We make this prediction under the assumption that at least one directed edge exists between $v$ and $w$. 
-In the second formulation, we ask whether $(w,v)$ exists given that there is the $(v,w)$ edge. 
-It would appear that predicting a symmetric relationship between nodes is a more difficult task than predicting reciprocation in a specific direction, and we show that this is indeed the case.
+In the second formulation, we ask whether $(w,v)$ exists given that the 
+$(v,w)$ edge exists.
+Intuitively, it would appear that predicting a symmetric relationship
+between nodes is a more difficult task than predicting reciprocation
+in a specific direction, and we show that this is indeed the case.
 
 \subsection{Notation}
-The number of messages users author in Twitter exhibits a long-tail distribution; many users produce only a small number of messages.
-In this work, we will focus on users who have produced a large number of @-messages.
+The number of messages produced by users on 
+Twitter exhibits a long-tail distribution; many users produce only a small number of messages.
+In this work, we will focus on users who have produced 
+a large number of @-messages, so that we are studying 
+a user population for whom Twitter is a significant communication medium.
 We consider the subgraphs of the form $G_n = (V_n, E_n)$, where $V_n = \{v~|~v \in V, v \text{ sent } \ge n \text{ messages}\}$ and $E_n = \{e=(v,w)~|~e \in E,~v \text{ and } w \in V_n\}$.
-This subgraph captures the @-messaging interactions between users who are prolific Twitter users.
+This subgraph thus captures the @-messaging interactions between users who are prolific Twitter users.
 We use the notation $v \xrightarrow{k} w$ to indicate that $v$ sent at least $k$ @-messages to $w$. 
 From this definition we can formalize reciprocity in terms of $k$. 
-We say that an edge $(v,w)$ is reciprocated if both $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and is unreciprocated if only $v \xrightarrow{k} w$.
-Let the set of reciprocated edges be \(E_k^r = \{ (v,w) : v \xrightarrow{k} w \text{ and } w \xrightarrow{k} v \} \), and the set of unreciprocated edges be \(E_k^u = \{ (v,w) : v \xrightarrow{k} w\}\).
-Finally, let $\deg^-(v)$ and $\deg^+(v)$ respectively denote the indegree and outdegree of node $v$, $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ be the messages received and sent by $v$, and $\Gamma^-(v) = \{w| (w,v) \in E\}$ be set of people who send messages to $v$.
+We say that an edge $(v,w)$ is {\em reciprocated} 
+if both $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and 
+is {\em unreciprocated} if only $v \xrightarrow{k} w$.
+Let the set of reciprocated edges be denoted $E_k^r$
+and the set of unreciprocated edges be denoted $E_k^u$.
+Finally, let $\deg^-(v)$ and $\deg^+(v)$ respectively denote the indegree and outdegree of node $v$, $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ be the messages received and sent by $v$, and $\Gamma^-(v) = \{w| (w,v) \in E\}$ be the set of people who send messages to $v$.
 
-\section{Dataset description}
-% TODO: Cite our other paper here for details about the data collection
+\subsection{Dataset description}
+% In non-anonymous version: Cite our other paper here for details about the data collection
 We extract the \emph{@-message graph} from a large crawl of Twitter that took place between August 2009 and January 2010.
 More than three-billion messages from over 60 million users were collected.  
 The @-message graph is constructed by looking at Tweets a user $v$ authors which mention user $w$ at the beginning of the Tweet.  
-The graph $G = (V,E)$ of users who authored at least one @-message contains 12,795,683 unique users who sent a total of 819,305,776 @-messages, with 156,868,257 unique directed interactions. 
+The graph $G = (V,E)$ of users who authored at least one @-message 
+contains 12,795,683 distinct users who sent a total 
+of 819,305,776 @-messages, with 156,868,257 distinct directed interactions. 
 
 We focus our analysis on the subgraph $G_{1000}$, the subgraph induced by users who authored at least 1000 @-messages. 
 Furthermore, we only consider an edge $(v,w)$ to be present if at least 10 @-messages were sent from $v$ to $w$ (in our notation, $v \xrightarrow{10} w$).
-In $G_{1000}$, which involves 181,033 users, we find that $|E^r_{10}| = 797,342$, $|E^u_{10}| = 349,258$
+In $G_{1000}$, which involves 181,033 users, we find that $|E^r_{10}| = 797,342$ and $|E^u_{10}| = 349,258$
 
 \section{Methods for Reciprocity Prediction}
 Intuitively, features that capture whether $v$ and $w$ have similar status or a similar social circle should be potentially useful in predicting reciprocation. 
@@ -106,18 +238,19 @@ This section presents the various features that we use for predicting reciprocit
 Each feature corresponds to a method that assigns a value $\operatorname{val}(v,w)$ to a node pair $(v,w)$, or a value $\operatorname{val}(v)$ to a single node $v$. 
 For each feature, we look at the feature value and whether the edge in question is reciprocated; this data is used for training models to predict reciprocity.
 
-Given the values corresponding to all node pairs (or nodes) in question, we can then choose threshold values or ranges where we predict reciprocity, and none otherwise.
+Given the values corresponding to all node pairs (or nodes) in question, we can then choose threshold values or ranges where we predict reciprocity, 
+predicting lack of reciprocity in the complementary region.
 We consider a simple threshold classification scheme which predicts that a node pair $(u,v)$ is unreciprocated if the feature value is less than (or greater than) some threshold, and is reciprocated otherwise.
-For each feature, we determine the threshold value $\operatorname{val}_{OPT}$ and threshold direction (less than / greater than), as to maximize prediction accuracy according to this threshold classifier.
-Intuitively, we expect that larger values of each property correspond to a stronger indication of reciprocity. 
-For example, a high mutual neighbor count for the nodes $v$ and $w$ could strongly indicate the existence of a reciprocated link between them.
-(Since we are putting tables later, it might be worth referencing it here?)
+For each feature, we determine the threshold value $\operatorname{val}_{OPT}$ and threshold direction (less than / greater than), so as to maximize prediction accuracy according to this threshold classifier.
+For example, a sufficiently high number of mutual neighbors 
+for the nodes $v$ and $w$ could strongly indicate the existence of a reciprocated link between them.
+The list of features we consider is summarized in Table \ref{table_recmethods}.
 
 As previously mentioned, there are two ways that we can formulate the prediction problem, and we present four different formulations in which we try to predict reciprocity. 
 The first addresses the question of symmetry, while the other three examine the problem of reciprocity in which the available information about the nodes in question is limited:
 
 \begin{enumerate}
-\item SYM (predicting symmetry): predict whether an edge is bidirectional or asymmetric after removing all information about the potential edges in question, using existing information about $v$ and $w$.
+\item SYM (predicting symmetry): predict whether an edge is symmetric or asymmetric after removing all information about the potential edges in question, using existing information about $v$ and $w$.
 \item REV (predicting a reverse edge): predict whether a reverse edge exists given that the forward edge $(v,w)$ exists, using information about $v$ and $w$.
 \item REV-$w$ (predicting a reverse edge using only $w$): predict whether a reverse edge exists given that $(v,w)$ exists, but using only information about $w$.
 \item REV-$v$ (predicting a reverse edge using only $v$): predict whether a reverse edge exists given that $(v,w)$ exists, but using only information about $v$.
@@ -128,7 +261,7 @@ Within this framework, we can compare the predictive power of specific features 
 \subsection{Degree and message features}
 It seems intuitive that the relative indegree or outdegree of nodes would indicate whether a pair of nodes are in a one-sided or two-sided relationship. 
 If both have a similar indegree, this might indicate that they are at a similar social status in the network. 
-In contrast, disproportionate indegrees could indicate that one user is a celebrity and the other is a non-celebrity, making it unlikely that their relationship is reciprocated.
+In contrast, disproportionate indegrees could indicate that one user is a celebrity and the other is a non-celebrity, making it less likely that their relationship is reciprocated.
 
 We now describe the features we use which are based on degree and message counts.  
 Both relative (e.g., the ratio of indegrees) and absolute (e.g., $\deg^-(w)$) feature measures are considered:
@@ -137,37 +270,52 @@ Both relative (e.g., the ratio of indegrees) and absolute (e.g., $\deg^-(w)$) fe
 \begin{itemize}
 \item \emph{Indegree and outdegree ratio} both measure the ratio of outdegrees or indegrees of two nodes, and we define $\operatorname{val}(v,w) = \deg^-(v)/\deg^-(w)$ or $\deg^+(v)/\deg^+(w)$, respectively.
 
-\item \emph{Incoming message and outgoing message ratio} are similar, but instead uses the total number of messages that a node receives or sends, regardless of the nodes to which messages are sent or from which  messages are received. TODO: put the def here to be precise.
+\item \emph{Incoming message and outgoing message ratio} are similar,
+but instead uses the total number of messages that a node receives or
+sends, regardless of the nodes to which messages are sent or from
+which  messages are received.  Specifically, we use the analogous measures
+discussed just above for degree, but with 
+$\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ playing
+the roles of $\deg^-(v)$ and $\deg^+(v)$ respectively.
 
 \item \emph{Incoming message/indegree ratio and outgoing message/outdegree ratio} compares the ratio of two nodes' incoming message to indegree ratio or outgoing message to outdegree ratio. 
 A high incoming message to indegree ratio might characterize users who have a small group of friends with which they exchange many messages.
-Alternatively, a low incoming message to indegree ratio could characterize highly connected (and thus high-status [do we want to make a status claim?]) people in a network, since the messages they receive are distributed over many more users.
+Alternatively, a low incoming message to indegree ratio could characterize highly connected 
+people in a network, since the messages they receive are distributed over many more users.
 
 \item \emph{Outdegree/indegree ratio} is a heuristic that characterizes the messaging activity of a single node.  
-A large outdegree/indegree ratio might indicate a user of celebrity status because she receives many messages from many followers [make sure followers is mentioned somewhere earlier in the paper] but sends relatively few messages. 
+A large outdegree/indegree ratio might indicate a user of celebrity status because she receives many messages from many followers  
+but sends relatively few messages. 
 Given a pair of nodes, we can compute the outdegree/indegree ratio as $\operatorname{val}(v,w) = \frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)}$.
 \end{itemize}
+
 \subsection{Link prediction features}
+
 It is not intuitive whether methods that work well for link prediction would work well in predicting reciprocity. 
 While link prediction asks whether an edge could exist between two nodes, reciprocity prediction asks whether a known directed-edge is actually bidirectional.
 The following are some measures used in the link-prediction task:
 
-\emph{Newman} \cite{graph:common-neighbors} showed that the number of common neighbors in a collaboration network can be a preditor of future links. \emph{Mutual neighbors} calculates the number of people to whom both $v$ and $w$ send messages ($|\Gamma^+(v) \cap \Gamma^+(w)|$), or the number of people from whom both $v$ and $w$ receive messages ($|\Gamma^-(v) \cap \Gamma^-(w)|$).
+\emph{Newman} \cite{graph:common-neighbors} showed that the number of common neighbors in a collaboration network can be a predictor of future links. \emph{Mutual neighbors} calculates the number of people to whom both $v$ and $w$ send messages ($|\Gamma^+(v) \cap \Gamma^+(w)|$), or the number of people from whom both $v$ and $w$ receive messages ($|\Gamma^-(v) \cap \Gamma^-(w)|$).
 
-\emph{Jaccard's coefficient} \cite{Salton:86} is a similarity measure that we apply to the concept of mutual neighbors, we calculate the similarity between two sets by taking the ratio of the cardinality of their intersection and their union: \[\operatorname{val}(v,w) = \frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup \Gamma^-(w)|}.\]
+\emph{Jaccard's coefficient} \cite{Salton:86} is a similarity measure
+that we apply to the concept of mutual neighbors; we calculate the
+similarity between two sets by taking the ratio of the cardinality of
+their intersection and their union: \[\operatorname{val}(v,w) =
+\frac{|\Gamma^-(v) \cap \Gamma^-(w)|}{|\Gamma^-(v) \cup
+\Gamma^-(w)|}.\]
 
 \emph{Adamic and Adar} \cite{Adamic:2003ud} defined the similarity between web sites $v,w$ to be $ \sum_{\{x|v,w \text{ share feature }x\}} \frac{1}{\log{\text{frequency}(x)}} $, and we similarly define $\operatorname{val}(v,w)$ to be \[ \sum_{\{x|x \in \Gamma^-(v) \cap \Gamma^-(w)\}} \frac{1}{\log{\deg^-(x)}} .\]
 
-\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. Newman \cite{graph:common-neighbors} and Barabasi et al. \cite{Barabasi:2002} showed that the product of the in degree of two nodes in a co-authorship network can be a predictor of a future link between the nodes. Here, we apply prefferential attachement in a slightly different way,  $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^+(w)$, or $\deg^+(v)\cdot \deg^-(w)$. 
+\emph{Preferential attachment} is another popular heuristic in modeling network growth, where the probability that an edge forms with a specific node is proportional to its existing indegree. Newman \cite{graph:common-neighbors} and Barabasi et al. \cite{Barabasi:2002} showed that the product of the in-degrees of two nodes in a co-authorship network can be a predictor of a future link between the nodes. Here, we apply preferential attachement in a slightly different way,  $\operatorname{val}(v,w) = \deg^-(v)\cdot \deg^+(w)$, or $\deg^+(v)\cdot \deg^-(w)$. 
 Notice that taking the ratio of these two values is equivalent to the outdegree/indegree ratio between two nodes.
 
 \emph{Two-step paths (ratio)} is a simplification of Katz's \cite{Katz:1953un} measure of status by calculating the number of paths between two nodes. 
-In this work, we only consider paths of length 2, and define $\operatorname{val}(v,w) = \operatorname{paths}^2(v,w)|$, where $\operatorname{paths}^2(v,w)$ is the set of paths from $v$ to $w$ of length $2$. 
+In this work, we only consider paths of length 2, and define $\operatorname{val}(v,w) = |\operatorname{paths}^2(v,w)|$, where $\operatorname{paths}^2(v,w)$ is the set of paths from $v$ to $w$ of length $2$. 
 The two-step paths ratio is simply the ratio of number of two-step paths from $v$ to $w$ to that from $w$ to $v$. 
 
 
 \subsection{Different sets of features}
-The features above have been shown to work well for the related but different task of predicting the exitence of a link. Since our task is to predict whether a link is reciprocated we also we examine several additional features, and for convenience, we further break these down into four sets:
+The features above have been shown to work well for the related but different task of predicting the existence of a link. Since our task is to predict whether a link is reciprocated we also we examine several additional features, and for convenience, we further break these down into four sets:
 \begin{enumerate}
 	\item Absolute degree/message features - degree, messages, message-degrees, outdegree-indegrees
 	\item Relative degree/message features - degree ratios, message ratios, message-degree ratios, and outdegree-indegree ratios
@@ -175,7 +323,7 @@ The features above have been shown to work well for the related but different ta
 	\item Link prediction features - all other link prediction features not mentioned
 \end{enumerate}
 
-\subsection{Two-step hops}
+\subsection{Two-step paths}
 \begin{figure}[!t]
 \centering
 \caption{Two-step hops}
@@ -227,13 +375,14 @@ The features above have been shown to work well for the related but different ta
 \end{tikzpicture}}
 \end{figure}
 The importance of ``friends of friends,'' or people two links away from a given node, lends itself to exploring features that directly arise out of the directed @-message graph. 
-There are essentially four types of two-step hops, as shown in figure \ref{fig_2step}, corresponding to either the number of common in-neighbors or out-neighbors (mutual neighbors), or the number of directed paths from $v$ to $w$ or from $w$ to $v$ (two-step paths). 
+There are essentially four types of two-step hops, as shown in Figure \ref{fig_2step}, corresponding to either the number of common in-neighbors or out-neighbors (mutual neighbors), or the number of directed paths from $v$ to $w$ or from $w$ to $v$ (two-step paths). 
 
 If both $v$ and $w$ send messages to many common people, it is likely that they are in the same social circle, or it could be that $v$ and $w$ simply message the same celebrities. 
-If $v$ and $w$ receive many messages from the same group of people, it could be that both $v$ and $w$ are in the same community, or that both $v$ and $w$ are celebrities (who may or may not talk to each other) and there is an overlapping fanbase.
+If $v$ and $w$ receive many messages from the same group of people, it could be that both $v$ and $w$ are in the same community, or that both $v$ and $w$ are celebrities (who may or may not talk to each other) and there is an overlapping fan-base.
 
-As the number of paths from $v$ to $w$ increases, there are two conflicting forces of $w$ being popular and thus it unlikely for $w$ to reciprocate an edge from $v$ to $w$. 
-The reverse case is simpler--- intuitively, as the number of paths from $w$ to $v$ increases, the likelihood that $w$ knows $v$ grows.
+As the number of paths from $v$ to $w$ increases, there are two conflicting forces: $v$ has a stronger source of connections to $w$, but at the same time
+$w$ is more popular and hence less likely to reciprocate the $(v,w)$ edge.
+The reverse case is simpler--- intuitively, as the number of paths from $w$ to $v$ increases, the likelihood that $w$ will communicate with $v$ grows.
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -290,18 +439,20 @@ Two-step paths ratio & $\frac{|\operatorname{paths}^2(v,w)|}{|\operatorname{path
 
 \subsection{Individual properties}
 To calculate the accuracy of the individual heuristics, we calculated $\operatorname{val}$ for each feature on the subset $E_{10}^r \cup E_{10}^u$ of the graph $G_{1000}$, where equal numbers of edges were taken from the two sets of reciprocated and unreciprocated edges. 
-This would give a baseline accuracy is 0.500, and you would achieve this by predicting that all edges were of one type. 
+This gives a baseline accuracy is 0.500, achievable by predicting that all edges are of one type. 
 We applied the SYM and REV mechanisms to feature sets 2-4, and REV-$v$ and REV-$w$ to feature set 1.
 
 We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
-Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic.
+Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while 
+Table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic.
 
 In tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW}, a star ($*$) indicates that reciprocity was predicted when $\operatorname{val}$ was below the threshold, and a lack thereof indicates reciprocity was predicted when $\operatorname{val}$ was above the threshold.
 
-In table \ref{table_recresults_indeg}, SYM$^+$ refers to the prediction mechanism where we aim to predict symmetry and predict all edges with values \emph{above} $val_{OPT}$ to be reciprocated, and REV$^-$ refers to the mechanism where we aim to predict whether a reverse edge $(w,v)$ exists given $(v,w)$ and predict all edges with values \emph{below} $val_{OPT}$ to be reciprocated. 
+In Table \ref{table_recresults_indeg}, SYM$^+$ refers to the prediction mechanism where we aim to predict symmetry and predict all edges with values \emph{above} $val_{OPT}$ to be reciprocated, and REV$^-$ refers to the mechanism where we aim to predict whether a reverse edge $(w,v)$ exists given $(v,w)$ and predict all edges with values \emph{below} $val_{OPT}$ to be reciprocated. 
 
 \subsubsection{Comparison of prediction mechanisms}
-We observe higher accuracy for the REV task than SYM, as REV is ``easier" than SYM since you know more information about the edge $(v,w)$.
+We observe higher accuracy for the REV task than SYM, as REV is ``easier" than SYM 
+since we know more information about the edge $(v,w)$.
 
 Comparing REV-$v$ to REV-$w$, we see REV-$w$ obtains higher accuracy compared to REV-$v$. This suggests that when trying to predict the existence of the edge from $w$ to $v$ given $(v,w)$, knowing about properties of $w$ is more valuable than knowing properties of $v$.
 
@@ -321,12 +472,34 @@ However, the \emph{smaller} the outdegree-indegree ratio, the more likely recipr
 In other words, a small numerator and a large denominator in $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} = \frac{\deg^+(v)\deg^-(w)}{\deg^-(v)\deg^+(w)}$ is a good indicator of reciprocation. 
 And indeed, a large denominator and small numerator indicates that $v$ has many in-links and few out-links and that $w$ has many out-links and few in-links. This suggests that $v$ has higher ``status" than $w$ and hence increases the probability that $w$ links to $v$.
 
-Interestingly, separating the numerator and denominator from the outdegree-indegree ratio above, which corresponds to our two preferential attachment features, results in two very different results. 
-While a small numerator does decently well (preferential attachment ($v$ to $w$)), a large denominator does not (preferential attachment ($w$ to $v$)) and this only performs marginally better than chance. It is reasonable that the numerator and denotimatior individially perform worse than the ratio, since the ratio takes into account both of them. However, the fact that the denominator performs so poorly is very surprising because a large denominator indicates that $v$ has a higher status than $w$ but it also causes a higher change that $w$ links to $v$ even if $w$ were to pick who to link to at random. On the other hand, a small numerator makes a statement about status but not about higher changes of reciprocation under a random process. The fact that a small numerator is more important than a large denominator suggests that status (measured by the number of in and out links) is a very powerful preditor for reciprocity.
+Interestingly, separating the numerator and denominator from the
+outdegree-indegree ratio above, which corresponds to our two
+preferential attachment features, leads to two very different
+results.  While a small numerator does reasonably well (preferential
+attachment ($v$ to $w$)), a large denominator does not (preferential
+attachment ($w$ to $v$)) and this only performs marginally better than
+chance. It is reasonable that the numerator and denotimatior
+individially perform worse than the ratio, since the ratio takes into
+account both of them. However, the fact that the denominator performs
+so poorly is very surprising because a large denominator suggests
+that $v$ has a higher status than $w$, and it also causes a higher
+chance that $w$ links to $v$ even if $w$ were to pick who to link to
+at random. On the other hand, a small numerator makes a statement
+about status but not about higher chances of reciprocation under a
+random process. The fact that a small numerator is more important than
+a large denominator suggests that status (measured by the number of in
+and out links) is a very powerful preditor for reciprocity.
 
 \paragraph{REV-$v$ vs. REV-$w$}
-Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, the difference is not as significant [be more specific about significance?]. 
-Analogous to whether you would want to know more about the features of a marketer ($v$) vs. a subscriber ($w$), knowing about the subscriber tells us more about the relationship between both. <<Expand>>
+Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, 
+the difference is not as significant.
+The fact that information about $w$ is more useful than information
+about $v$ forms a suggestive contrast for various domains of
+potential application: for example, if we think of $v$ as sending 
+information to $w$ via the $(v,w)$ communication link (consider for example
+a marketer $v$ contacting a potential customer $w$), then we find
+that knowledge of the recipient ($w$) tells us more about the 
+probability of a response than knowledge of the sender ($v$).
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -456,12 +629,27 @@ All (1-4) & 0.862 & Outdegree-indegree ratio \\
 \end{tabular}
 \end{table}
 
-Table \ref{Decision Tree Accuracy} shows the accuracy of the trees and their most important attribute for the different sets of features. We notice that the accuracy when we only use degree/message features compared to that when we include all features is the same. And although we observe that the two step paths ratio obtains an accuracy of 0.760 on its own while the decision tree for link prediction only manages 0.739, this can be attributed to the inaccuracy introduced splitting each continuous variable into 10 discrete portions. Furthemore, we notice that the features that are commonly used for link prediction yield a tree of lower accuracy than other features. This shows that the problem of prediction reciprocation is different predicting reciprocation.  
+Table \ref{table_recresults_dtree} shows the accuracy of the trees and
+their most important attribute for the different sets of features. We
+notice that the accuracy when we only use degree/message features
+compared to that when we include all features is the same. And
+although we observe that the two-step paths ratio obtains an accuracy
+of 0.760 on its own while the decision tree for link prediction only
+manages 0.739, this can be attributed to the inaccuracy introduced
+splitting each continuous variable into 10 discrete portions.
+Furthemore, we notice that the features that are commonly used for
+link prediction yield a tree of lower accuracy than other features.
+This establishes a concrete sense in which 
+the problem of predicting reciprocation is quite different
+from link predictions.
 
 Whenever the outdegree-indegree value or ratio was included as an attribute, it became the most important.
 
 \subsection{Regression analysis}
-We used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$ and $z = \beta_0 + \beta F$, where $f(z)$ is binary and takes the value 1 when an edge is reciprocated, and 0 otherwise. $F$ is the vector of features.
+We also used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$ and $z = \beta_0 + \beta F$, where $f(z)$ is binary and takes the value 1 when an edge is reciprocated, and 0 otherwise. $F$ is the vector of features.
+The results are shown in 
+Tables \ref{table_recresults_logr}---\ref{table_recresults_lograll3}.
+
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
@@ -582,24 +770,53 @@ Preferential attachment ($w$ to $v$)  &  - & -  \\
 \section{Twitter as a superposition of networks}
 
 \subsection{(Un)reciprocated subgraph analysis}
-We also analyzed how various properties of the subgraphs $G_n$, as well as the edge sets $E^r_k$ and $E^u_k$ varied as we adjusted $n$ and $k$.
+We also analyze how various properties of the subgraphs $G_n$, as well as the edge sets $E^r_k$ and $E^u_k$ vary as we adjust $n$ and $k$.
 
-\paragraph{Reciprocated and unreciprocated edges} we notice that the frequency of reciprocated edges is approximately 2 to 3 times that of unreciprocated edges, and the proportion of reciprocated edges increases as $n$ and $k$ increases (Fig. \ref{fig_rur_propn}, \ref{fig_rur_propk}). 
+\paragraph*{Reciprocated and unreciprocated edges} We observe that the frequency of reciprocated edges is approximately 2 to 3 times that of unreciprocated edges, and the proportion of reciprocated edges increases as $n$ and $k$ increases (Fig. \ref{fig_rur_propn}, \ref{fig_rur_propk}). 
 While reciprocated communication is the dominant form of interaction, we see a significant number of ``unreciprocated'' interaction, indicating that a significant number of relationships on Twitter are unbalanced. 
-This could occur when a user of lower status tries to get the attention of a more influential user (of higher status) by messaging him or her (e.g. when a fan messages a celebrity multiple times hoping to get a reply). 
+This could occur when a user of lower status repeatedly invokes
+the name of a
+more influential user (of higher status) through messaging,
+as suggested in the introduction.
 
-\paragraph{Reciprocated and unreciprocated nodes} a majority of nodes have reciprocated relationships, with a small proportion having only unreciprocated relationships. 
+\paragraph*{Reciprocated and unreciprocated nodes} A majority of nodes have reciprocated relationships, with a small proportion having only unreciprocated relationships. 
 A significant proportion of nodes take part in both reciprocated and unreciprocated relationships - indicating that while there are two distinct types of relationships occurring on Twitter, this does not correspond to two distinct types of users. 
-A reason that ``unreciprocated'' Twitter users are not common might be that social relationship, and hence reciprocated relationships, are the driving force in active and continued use of the platform. 
+The fact that it is rare to find 
+active Twitter users taking part in only unreciprocated interactions
+suggests a sense in which 
+social (reciprocated) relationships may be the 
+driving force in the active and continued use of the platform.
 
-We can also see this in Fig. \ref{fig_rur_sca2}, a scatter plot of the number of users with each of three types of interaction - 1 reciprocated and 2 unreciprocated, as an unreciprocated  interaction is by definition asymmetric. 
-We differentiate between both ends in an unreciprocated edge ($v \xrightarrow{k} w$ and $w \xrightarrow{0} v$), where where a user could be $v$ if she's not replied to, or $w$ if she doesn't reply. 
-The most common type of nodes are those which only have reciprocated edges, with far fewer having unreciprocated interactions of some type.
+We can also see this in Fig. \ref{fig_rur_sca2}, a scatter plot of the
+number of users $v$ with each of three types of interaction:
+(i) reciprocal relationships with both $(v,w)$ and $(w,v)$ present;
+(ii) unreciprocated ``out-going'' relationships with only $(v,w)$ present;
+and 
+(iii) unreciprocated ``in-coming'' relationships with only $(w,v)$ present.
+We thus differentiate between both ends in an
+unreciprocated edge ($v \xrightarrow{k} w$ and $w \xrightarrow{0} v$),
+where a user could be $v$ if she's not replied to, or $w$ if she
+doesn't reply.  The most common type of nodes are those which only
+have reciprocated edges, with far fewer having unreciprocated
+interactions of some type.
 
-\paragraph{Clustering coefficient remains relatively stable as $n$, $k$ vary:} this demonstrates that the network properties of these subgraphs do not change significantly even if we sample from a relatively smaller population of all users (Fig. \ref{fig_rur_cc_n},\ref{fig_rur_cc_k}).
+\paragraph*{Clustering coefficient remains relatively stable as $n$, $k$ vary:}
+The clustering coefficient is much larger in the subgraph of reciprocated
+edges, which corresponds naturally to the notion that reciprocated 
+edges represent more social activity, with a larger density of triangles.
+The fact that these quantities are stable as we change $n$ and $k$ suggests
+that the network properties of these subgraphs do not change significantly even if we sample from a relatively smaller population of all users (Fig. \ref{fig_rur_cc_n},\ref{fig_rur_cc_k}).
 
-\paragraph{Connected component remains stable as $n$ varies, but decreases as $k$ increases.} 
-The graphs corresponding to $E_k^r$ and $E_k^u$ are connected for relatively low values of $k$ and decreases as $k$ increases. <<TODO Something interesting about this?>> (Fig. \ref{fig_rur_lcc_n},\ref{fig_rur_lcc_k}).
+\paragraph*{Connected component remains stable as $n$ varies, but decreases as $k$ increases.} 
+The graphs corresponding to $E_k^r$ and $E_k^u$ have giant components
+for relatively low values of $k$.
+However, the size of the largest component shrinks rapidly once 
+$k$ passes a particular range (roughly between 50 and 100).
+(Fig. \ref{fig_rur_lcc_n},\ref{fig_rur_lcc_k}).
+This hints at a kind of qualitative transition in the structure of the
+network as a function of message volume, with the edges representing 
+more than 100 communications each being unable to sustain a very large
+component on their own.
 
 \begin{figure}[!t]
 \centering
@@ -681,11 +898,37 @@ The graphs corresponding to $E_k^r$ and $E_k^u$ are connected for relatively low
 % reference/describe all of them (a), (b), etc., within the main caption.
 
 \section{Conclusion}
-To be written.
+
+We have formulated several variants of the problem of 
+reciprocity prediction in an on-line social network, and we
+have obtained strong performance
+using properties of nodes and their local network neighborhoods.
+In particular, features that approximate the relative status of
+two nodes $v$ and $w$ appear to be the most effective at 
+predicting whether a link between $v$ and $w$ will be reciprocal.
+We have also studied the subgraphs of reciprocated and unreciprocated
+links, finding that they differ in important ways with respect
+to component sizes and clustering.
+
+There are a number of interesting further directions that could
+pursued on this problem.
+First, our approach has used structural features of the system,
+but it would be very interesting to combine these with other
+data such as textual content to obtain
+stronger estimates of reciprocation.
+Second, temporal information is another important source of data
+in analyzing reciprocation, and understanding how reciprocated
+and unreciprocated interactions develop over time could provide
+further insight into the problem.
+And third, we should remember that reciprocation is one aspect of
+the broader issue of heterogeneity in the types of interactions
+encountered on a site such as Twitter, and finding other
+dimensions along which to express this heterogeneity is an 
+important question as well.
 
 
-\section*{Acknowledgment}
- This work was supported by (SOMEGRANT).
+% \section*{Acknowledgment}
+ % This work was supported by (SOMEGRANT).
 
 
 \bibliographystyle{IEEEtran}

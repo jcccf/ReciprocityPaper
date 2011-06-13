@@ -1,3 +1,12 @@
+@string{CHI = {ACM Conference on Human Factors in Computing Systems}}
+@string{CHI09 = {Proc. 27th } # CHI}
+@string{CHI10 = {Proc. 28th } # CHI}
+@string{ICWSM = {International Conference on Weblogs and Social Media}}
+@string{ICWSM10 = {Proc. 4th } # ICWSM}
+@string{JASIST = {Journal of the American Society for Information Science and Technology}}
+@string{WWW = {International World Wide Web Conference}}
+@string{WWW10 = {Proc. 19th } # WWW}
+
 %% Created using Papers on Sun, 01 May 2011.
 %% http://mekentosj.com/papers/
 
@@ -9,11 +18,19 @@ year = {2003},
 month = {jan}
 }
 
-@article{Nowell:2003vk,
-author = {Nowell, DL},
-title = {{The link Prediction Problem for Social Networks}},
-year = {2003}
+@article{       liben-nowell-link-pred,
+  author    = {David Liben-Nowell and
+               Jon Kleinberg},
+  title     = {The link-prediction problem for social networks},
+  journal   = JASIST,
+  volume    = {58},
+  number    = {7},
+  year      = {2007},
+  pages     = {1019-1031},
+  ee        = {http://dx.doi.org/10.1002/asi.20591},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
 }
+
 
 @article{Katz:1953un,
 author = {Katz, L},
@@ -87,3 +104,47 @@ month = sep
     volume = {311},
     year = {2002}
 }
+
+@inproceedings{kwak-what-is-twitter,
+  author    = {Haewoon Kwak and
+               Changhyun Lee and
+               Hosung Park and
+               Sue B. Moon},
+  title     = {What is Twitter, a social network or a news media?},
+  booktitle = WWW10,
+  year      = {2010},
+  pages     = {591-600},
+  ee        = {http://doi.acm.org/10.1145/1772690.1772751},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@inproceedings{romero-directed-closure,
+  author    = {Daniel M. Romero and
+               Jon M. Kleinberg},
+  title     = {The Directed Closure Process in Hybrid Social-Information
+               Networks, with an Analysis of Link Formation on Twitter},
+  booktitle = ICWSM10,
+  year      = {2010},
+  ee        = {http://www.aaai.org/ocs/index.php/ICWSM/ICWSM10/paper/view/1488},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@inproceedings{gilbert-tie-strength,
+  author    = {Eric Gilbert and
+               Karrie Karahalios},
+  title     = {Predicting tie strength with social media},
+  booktitle = CHI09,
+  year      = {2009},
+  pages     = {211-220},
+  ee        = {http://doi.acm.org/10.1145/1518701.1518736},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@InProceedings{   leskovec-chi10,
+  author        = {Jure Leskovec and Dan Huttenlocher and Jon Kleinberg},
+  title         = {Signed networks in social media},
+  booktitle     = CHI10,
+  pages         = {1361--1370},
+  year          = 2010
+}
+
