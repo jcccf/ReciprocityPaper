@@ -210,11 +210,11 @@ a large number of @-messages, so that we are studying
 a user population for whom Twitter is a significant communication medium.
 We consider the subgraphs of the form $G_n = (V_n, E_n)$, where $V_n = \{v~|~v \in V, v \text{ sent } \ge n \text{ messages}\}$ and $E_n = \{e=(v,w)~|~e \in E,~v \text{ and } w \in V_n\}$.
 This subgraph thus captures the @-messaging interactions between users who are prolific Twitter users.
-We use the notation $v \xrightarrow{k} w$ to indicate that $v$ sent at least $k$ @-messages to $w$. 
+We use the notation $v \xrightarrow{k} w$ to indicate that $v$ sent at least $k$ @-messages to $w$, and $v \xrightarrow{=k} w$ to indicate that $v$ sent exactly $k$ @-messages to $w$. 
 From this definition we can formalize reciprocity in terms of $k$. 
 We say that an edge $(v,w)$ is {\em reciprocated} 
 if both $v \xrightarrow{k} w$ and $w \xrightarrow{k} v$, and 
-is {\em unreciprocated} if only $v \xrightarrow{k} w$.
+is {\em unreciprocated} if $v \xrightarrow{k} w$ and $w \xrightarrow{=0} v$.
 Let the set of reciprocated edges be denoted $E_k^r$
 and the set of unreciprocated edges be denoted $E_k^u$.
 Finally, let $\deg^-(v)$ and $\deg^+(v)$ respectively denote the indegree and outdegree of node $v$, $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ be the messages received and sent by $v$, and $\Gamma^-(v) = \{w| (w,v) \in E\}$ be the set of people who send messages to $v$.
@@ -444,11 +444,11 @@ We applied the SYM and REV mechanisms to feature sets 2-4, and REV-$v$ and REV-$
 
 We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
 Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while 
-Table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic.
+table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic.
 
 In tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW}, a star ($*$) indicates that reciprocity was predicted when $\operatorname{val}$ was below the threshold, and a lack thereof indicates reciprocity was predicted when $\operatorname{val}$ was above the threshold.
 
-In Table \ref{table_recresults_indeg}, SYM$^+$ refers to the prediction mechanism where we aim to predict symmetry and predict all edges with values \emph{above} $val_{OPT}$ to be reciprocated, and REV$^-$ refers to the mechanism where we aim to predict whether a reverse edge $(w,v)$ exists given $(v,w)$ and predict all edges with values \emph{below} $val_{OPT}$ to be reciprocated. 
+In table \ref{table_recresults_indeg}, SYM$^+$ refers to the prediction mechanism where we aim to predict symmetry and predict all edges with values \emph{above} $val_{OPT}$ to be reciprocated, and REV$^-$ refers to the mechanism where we aim to predict whether a reverse edge $(w,v)$ exists given $(v,w)$ and predict all edges with values \emph{below} $val_{OPT}$ to be reciprocated. 
 
 \subsubsection{Comparison of prediction mechanisms}
 We observe higher accuracy for the REV task than SYM, as REV is ``easier" than SYM 
@@ -648,7 +648,7 @@ Whenever the outdegree-indegree value or ratio was included as an attribute, it 
 \subsection{Regression analysis}
 We also used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$ and $z = \beta_0 + \beta F$, where $f(z)$ is binary and takes the value 1 when an edge is reciprocated, and 0 otherwise. $F$ is the vector of features.
 The results are shown in 
-Tables \ref{table_recresults_logr}---\ref{table_recresults_lograll3}.
+Tables \ref{table_recresults_logr}---\ref{table_recresults_lograll3}, where struck-out $\mathbf{p}$-values indicate insignificant features.
 
 
 \begin{table}[!t]
