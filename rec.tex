@@ -488,7 +488,9 @@ at random. On the other hand, a small numerator makes a statement
 about status but not about higher chances of reciprocation under a
 random process. The fact that a small numerator is more important than
 a large denominator suggests that status (measured by the number of in
-and out links) is a very powerful preditor for reciprocity.
+and out links) is a very powerful predictor for reciprocity.
+
+Indeed, if we only consider edges $e \in {(v,w)~|~\deg^-(v) = \deg^-(w)}$, or that both nodes in every node pair have equal indegree, the accuracy of the outdegree ratio feature rises to 0.811, compared to 0.628 without this filtering. This result is comparable to what we get for the outdegree-indegree ratio feature.
 
 \paragraph{REV-$v$ vs. REV-$w$}
 Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, 
@@ -644,6 +646,8 @@ the problem of predicting reciprocation is quite different
 from link predictions.
 
 Whenever the outdegree-indegree value or ratio was included as an attribute, it became the most important.
+
+If we only consider the set of edges node pairs with both nodes in a pair having equal indegree ($|E|=16,311$), the accuracy of All ratio rises to 0.927, suggesting that predicting reciprocity among nodes which have equal status is a relatively easier task (?). Here, the most important feature is outdegree ratio. but this is unsurprising, since outdegree-indegree ratio reduces to outdegree ratio in the case of equal indegrees. 
 
 \subsection{Regression analysis}
 We also used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$ and $z = \beta_0 + \beta F$, where $f(z)$ is binary and takes the value 1 when an edge is reciprocated, and 0 otherwise. $F$ is the vector of features.
