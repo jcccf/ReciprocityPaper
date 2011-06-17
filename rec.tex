@@ -196,7 +196,7 @@ is to predict the direction of edges between $v$ and $w$, and we note
 that this can be formalized in two distinct ways.
 First, we consider a formulation in which we decide whether a $\{v,w\}$ relationship is symmetric (that is, both $(v,w)$ and $(w,v)$ exist) or is asymmetric (only one of the directed $(v,w)$, $(w,v)$ relationship exists).
 We make this prediction under the assumption that at least one directed edge exists between $v$ and $w$. 
-In the second formulation, we ask whether $(w,v)$ exists given that the 
+In the second, we ask whether $(w,v)$ exists given that the 
 $(v,w)$ edge exists.
 Intuitively, it would appear that predicting a symmetric relationship
 between nodes is a more difficult task than predicting reciprocation
@@ -223,7 +223,7 @@ Finally, let $\deg^-(v)$ and $\deg^+(v)$ respectively denote the indegree and ou
 % In non-anonymous version: Cite our other paper here for details about the data collection
 We extract the \emph{@-message graph} from a large crawl of Twitter that took place between August 2009 and January 2010.
 More than three-billion messages from over 60 million users were collected.  
-The @-message graph is constructed by looking at Tweets a user $v$ authors which mention user $w$ at the beginning of the Tweet.  
+The @-message graph is constructed by looking at tweets a user $v$ authors which mention user $w$ at the beginning of the Tweet.  
 The graph $G = (V,E)$ of users who authored at least one @-message 
 contains 12,795,683 distinct users who sent a total 
 of 819,305,776 @-messages, with 156,868,257 distinct directed interactions. 
@@ -236,17 +236,17 @@ In $G_{1000}$, which involves 181,033 users, we find that $|E^r_{10}| = 797,342$
 Intuitively, features that capture whether $v$ and $w$ have similar status or a similar social circle should be potentially useful in predicting reciprocation. 
 This section presents the various features that we use for predicting reciprocity in networks. 
 Each feature corresponds to a method that assigns a value $\operatorname{val}(v,w)$ to a node pair $(v,w)$, or a value $\operatorname{val}(v)$ to a single node $v$. 
-For each feature, we look at the feature value and whether the edge in question is reciprocated; this data is used for training models to predict reciprocity.
+For each feature, we look at its value and whether the edge in question is reciprocated; this data is used for training models to predict reciprocity.
 
 Given the values corresponding to all node pairs (or nodes) in question, we can then choose threshold values or ranges where we predict reciprocity, 
-predicting lack of reciprocity in the complementary region.
+and predicting lack thereof in the complementary region.
 We consider a simple threshold classification scheme which predicts that a node pair $(u,v)$ is unreciprocated if the feature value is less than (or greater than) some threshold, and is reciprocated otherwise.
-For each feature, we determine the threshold value $\operatorname{val}_{OPT}$ and threshold direction (less than / greater than), so as to maximize prediction accuracy according to this threshold classifier.
+For each feature, we determine the threshold value $\operatorname{val}_{OPT}$ and threshold direction (less than / greater than) to maximize prediction accuracy according to this threshold classifier.
 For example, a sufficiently high number of mutual neighbors 
 for the nodes $v$ and $w$ could strongly indicate the existence of a reciprocated link between them.
 The list of features we consider is summarized in Table \ref{table_recmethods}.
 
-As previously mentioned, there are two ways that we can formulate the prediction problem, and we present four different formulations in which we try to predict reciprocity. 
+As previously mentioned, there are two ways that we can formulate the prediction problem, and we present four different formulations. 
 The first addresses the question of symmetry, while the other three examine the problem of reciprocity in which the available information about the nodes in question is limited:
 
 \begin{enumerate}
@@ -272,8 +272,8 @@ Both relative (e.g., the ratio of indegrees) and absolute (e.g., $\deg^-(w)$) fe
 
 \item \emph{Incoming message and outgoing message ratio} are similar,
 but instead uses the total number of messages that a node receives or
-sends, regardless of the nodes to which messages are sent or from
-which  messages are received.  Specifically, we use the analogous measures
+sends, regardless of which nodes messages are sent to or received from. 
+Specifically, we use the analogous measures
 discussed just above for degree, but with 
 $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ playing
 the roles of $\deg^-(v)$ and $\deg^+(v)$ respectively.
@@ -377,8 +377,8 @@ The features above have been shown to work well for the related but different ta
 The importance of ``friends of friends,'' or people two links away from a given node, lends itself to exploring features that directly arise out of the directed @-message graph. 
 There are essentially four types of two-step hops, as shown in Figure \ref{fig_2step}, corresponding to either the number of common in-neighbors or out-neighbors (mutual neighbors), or the number of directed paths from $v$ to $w$ or from $w$ to $v$ (two-step paths). 
 
-If both $v$ and $w$ send messages to many common people, it is likely that they are in the same social circle, or it could be that $v$ and $w$ simply message the same celebrities. 
-If $v$ and $w$ receive many messages from the same group of people, it could be that both $v$ and $w$ are in the same community, or that both $v$ and $w$ are celebrities (who may or may not talk to each other) and there is an overlapping fan-base.
+If both $v$ and $w$ send messages to many common people, it is likely that they are in the same social circle, or that they message the same celebrities. 
+If $v$ and $w$ receive many messages from the same group of people, it could be that both $v$ and $w$ are in the same community, or that they are celebrities with overlapping fanbases.
 
 As the number of paths from $v$ to $w$ increases, there are two conflicting forces: $v$ has a stronger source of connections to $w$, but at the same time
 $w$ is more popular and hence less likely to reciprocate the $(v,w)$ edge.
@@ -438,9 +438,9 @@ Two-step paths ratio & $\frac{|\operatorname{paths}^2(v,w)|}{|\operatorname{path
 \section{Results and Discussion}
 
 \subsection{Individual properties}
-To calculate the accuracy of the individual heuristics, we calculated $\operatorname{val}$ for each feature on the subset $E_{10}^r \cup E_{10}^u$ of the graph $G_{1000}$, where equal numbers of edges were taken from the two sets of reciprocated and unreciprocated edges. 
+To calculate the accuracy of the individual heuristics, we calculated $\operatorname{val}$ for each feature on the subset $E_{10}^r \cup E_{10}^u$ of the graph $G_{1000}$, where equal numbers of edges were taken from the sets of reciprocated and unreciprocated edges. 
 This gives a baseline accuracy is 0.500, achievable by predicting that all edges are of one type. 
-We applied the SYM and REV mechanisms to feature sets 2-4, and REV-$v$ and REV-$w$ to feature set 1.
+We applied the SYM and REV mechanisms to feature sets 2-4, and REV-$v$ and REV-$w$ to set 1.
 
 We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
 Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while 
@@ -454,7 +454,7 @@ In table \ref{table_recresults_indeg}, SYM$^+$ refers to the prediction mechanis
 We observe higher accuracy for the REV task than SYM, as REV is ``easier" than SYM 
 since we know more information about the edge $(v,w)$.
 
-Comparing REV-$v$ to REV-$w$, we see REV-$w$ obtains higher accuracy compared to REV-$v$. This suggests that when trying to predict the existence of the edge from $w$ to $v$ given $(v,w)$, knowing about properties of $w$ is more valuable than knowing properties of $v$.
+Comparing REV-$v$ to REV-$w$, we see REV-$w$ obtains higher accuracy, suggesting that when trying to predict the existence $(w,v)$ of given $(v,w)$, knowing about properties of $w$ is more valuable than knowing properties of $v$.
 
 Note that SYM$^-$, REV$^-$, REV$-w^+$ and REV-$v^-$ are such poor predictors that simply predicting that everything was reciprocated (or unreciprocated) would have been better.
 
@@ -469,8 +469,7 @@ When we look at features using one of the four mechanisms, the larger the value,
 For example, the \emph{larger} the indegree ratio, the more in-links $v$ has in relation to $w$, increasing the probability that $w$ will link to $v$, given that we know that $v$ already links to $w$.
 
 However, the \emph{smaller} the outdegree-indegree ratio, the more likely reciprocation occurs. 
-In other words, a small numerator and a large denominator in $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} = \frac{\deg^+(v)\deg^-(w)}{\deg^-(v)\deg^+(w)}$ is a good indicator of reciprocation. 
-And indeed, a large denominator and small numerator indicates that $v$ has many in-links and few out-links and that $w$ has many out-links and few in-links. This suggests that $v$ has higher ``status" than $w$ and hence increases the probability that $w$ links to $v$.
+In other words, a large denominator and small numerator in $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} = \frac{\deg^+(v)\deg^-(w)}{\deg^-(v)\deg^+(w)}$ is a good indicator of reciprocation. A large denominator and small numerator indicate that $v$ has many in-links and few out-links and that $w$ has many out-links and few in-links. This suggests that $v$ has higher ``status" than $w$ and hence increases the probability that $w$ links to $v$.
 
 Interestingly, separating the numerator and denominator from the
 outdegree-indegree ratio above, which corresponds to our two
@@ -490,7 +489,7 @@ random process. The fact that a small numerator is more important than
 a large denominator suggests that status (measured by the number of in
 and out links) is a very powerful predictor for reciprocity.
 
-Indeed, if we only consider edges $e \in {(v,w)~|~\deg^-(v) = \deg^-(w)}$, or that both nodes in every node pair have equal indegree, the accuracy of the outdegree ratio feature rises to 0.811, compared to 0.628 without this filtering. This result is comparable to what we get for the outdegree-indegree ratio feature.
+If we only consider edges $E_= = \{(v,w)~|~\deg^-(v) = \deg^-(w)\}$, or that both nodes in every node pair have equal indegree, the accuracy of the outdegree ratio feature rises to 0.811. This result is comparable to what we get for the outdegree-indegree ratio feature, which is unsurprising as that reduces to outdegree ratio with equal indegree. 
 
 \paragraph{REV-$v$ vs. REV-$w$}
 Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, 
@@ -647,12 +646,12 @@ from link predictions.
 
 Whenever the outdegree-indegree value or ratio was included as an attribute, it became the most important.
 
-If we only consider the set of edges node pairs with both nodes in a pair having equal indegree ($|E|=16,311$), the accuracy of All ratio rises to 0.927, suggesting that predicting reciprocity among nodes which have equal status is a relatively easier task (?). Here, the most important feature is outdegree ratio. but this is unsurprising, since outdegree-indegree ratio reduces to outdegree ratio in the case of equal indegrees. 
+If we only consider $E_=$, node pairs with equal indegree ($|E_=|=16,311$), the accuracy of All ratio drops to 0.776, suggesting that predicting reciprocity here is considerably more difficult as we lose the ability to differentiate nodes of different status, or indegree. Again, the most important feature is outdegree ratio.
 
 \subsection{Regression analysis}
 We also used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$ and $z = \beta_0 + \beta F$, where $f(z)$ is binary and takes the value 1 when an edge is reciprocated, and 0 otherwise. $F$ is the vector of features.
 The results are shown in 
-Tables \ref{table_recresults_logr}---\ref{table_recresults_lograll3}, where struck-out $\mathbf{p}$-values indicate insignificant features.
+tables \ref{table_recresults_logr}---\ref{table_recresults_lograll3}, where struck-out $\mathbf{p}$-values indicate insignificant features.
 
 
 \begin{table}[!t]
