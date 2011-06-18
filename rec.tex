@@ -29,10 +29,10 @@ Ithaca, NY 14853 \\
 dmr239@cornell.edu}
 \and
 \IEEEauthorblockN{Brendan Meeder}
-\IEEEauthorblockA{???\\
+\IEEEauthorblockA{Computer Science Department\\
 Carnegie Mellon University \\
-??? \\
-anon@whoare.you}
+Pittsburgh, PA 15213 \\
+bmeeder@cs.cmu.edu}
 \and
 \IEEEauthorblockN{Jon Kleinberg}
 \IEEEauthorblockA{Computer Science\\
@@ -73,12 +73,12 @@ of network links.
 
 \section{Introduction}
 
-As social media applications becomes richer and more complex,
+As social media applications become richer and more complex,
 they come to contain a wide range of different types of 
 connections among their users.
 An important source of variation is exhibited by the
 microblogging site Twitter, where communication links
-(for our purposes, @-messages directed from one user to another)
+(for our purposes, messages called @-messages which are directed from one user to another)
 can represent many different forms of interaction.
 Indeed, earlier research has shown that Twitter contains
 a large amount of social activity between users who interact
@@ -87,13 +87,13 @@ and information-sharing activity in which users interact with
 celebrities, news sources, and other types of high-visibility accounts
 \cite{kwak-what-is-twitter,romero-directed-closure}.
 
-The challenge, when studying an environment such as Twitter,
+A challenge when studying an environment such as Twitter
 is that all of these types of connections are superimposed 
 in a single communication network.
-As a result, it is important to develop techniques capable of dissecting
+Therefore, it is important to develop techniques capable of dissecting
 the links of the underlying network into these fundamentally
 different forms of activity.
-Here we develop a set of techniques for this purpose,
+We develop a set of techniques for this purpose
 by formulating and studying the problem of predicting
 {\em reciprocity} in linking.
 
@@ -128,8 +128,8 @@ We identify a set of features based on the characteristics of $v$ and $w$,
 and of nodes connected to $v$ and $w$, that have strong predictive
 value for this task.
 We find that differences in reciprocity can be related to the 
-notion of status --- roughly speaking,
-people with similar status often participate in reciprocal
+notion of status.
+Roughly speaking, people with similar status often participate in reciprocal
 interactions (e.g. messages between friends), while those with
 dissimilar status often participate in unreciprocated interactions (e.g.
 messages from fans to celebrities).
@@ -172,20 +172,19 @@ whereas the reciprocation of an existing link $(v,w)$ by
 the reverse edge $(w,v)$ is quite common on sites such as Twitter.
 For this and other reasons, we see in our analysis that the
 types of features that have been found to work well for link 
-prediction are not the ones that are most effective for 
-reciprocity prediction.
+prediction are not the most effective for reciprocity prediction.
 
 There has also been recent research predicting the 
 {\em strengths} \cite{gilbert-tie-strength} and the 
-{\em signs} \cite{leskovec-chi10} of links in an on-line social network.
-These too form interesting contrasts with reciprocity prediction.
+{\em signs} \cite{leskovec-chi10} of links in on-line social networks.
+These works form interesting contrasts with reciprocity prediction.
 In particular, it is possible for a strong directed tie to be
-either reciprocated or unreciprocated.  (For example, an avid
-follower of the New York Times might regular generate tweets
-that say things such as, ``@nytimes reports that ... '' without
-ever receiving a message from the @nytimes Twitter account.)
-There is also a connection to the problem of sign prediction in that
-notions of status are crucial there too \cite{leskovec-chi10},
+either reciprocated or unreciprocated.  For example, an avid
+follower of the New York Times might regular generate messages
+such as ``@nytimes reports that ... '' without
+ever receiving a message from the @nytimes Twitter account.
+In the problem of sign prediction the
+notion of status is crucial \cite{leskovec-chi10},
 but there are important distinctions in that reciprocated and
 unreciprocated links can easily exhibit either type of sign.
 
@@ -194,15 +193,16 @@ unreciprocated links can easily exhibit either type of sign.
 We now formalize the problem of predicting reciprocation.
 The input to our prediction problem is a directed graph $G=(V,E)$ and a node pair $\{v,w\}$, where $v,w \in V$ but all edges between $v$ and $w$ removed. 
 We use an @-message from $v$ to $w$ as an indication of a directed
-$(v,w)$ link (rather than other indications, such as the fact
-that $v$ follows $w$) --- this is in keeping with our focus 
+$(v,w)$ link, rather than other indications such as the fact
+that $v$ follows $w$.
+This is in keeping with our focus 
 on communication activities.
-Our task at a general level
+Generally, our task
 is to predict the direction of edges between $v$ and $w$, and we note
 that this can be formalized in two distinct ways.
 First, we consider a formulation in which we decide whether a $\{v,w\}$ relationship is symmetric (that is, both $(v,w)$ and $(w,v)$ exist) or is asymmetric (only one of the directed $(v,w)$, $(w,v)$ relationship exists).
 We make this prediction under the assumption that at least one directed edge exists between $v$ and $w$. 
-In the second, we ask whether $(w,v)$ exists given that the 
+In the second formulation, we ask whether the $(w,v)$ edge is present given that the 
 $(v,w)$ edge exists.
 Intuitively, it would appear that predicting a symmetric relationship
 between nodes is a more difficult task than predicting reciprocation
@@ -803,20 +803,20 @@ number of users $v$ with each of three types of interaction:
 and 
 (iii) unreciprocated ``in-coming'' relationships with only $(w,v)$ present.
 We thus differentiate between both ends in an
-unreciprocated edge ($v \xrightarrow{k} w$ and $w \xrightarrow{0} v$),
+unreciprocated edge ($v \xrightarrow{k} w$ and $w \xrightarrow{=0} v$),
 where a user could be $v$ if she's not replied to, or $w$ if she
 doesn't reply.  The most common type of nodes are those which only
 have reciprocated edges, with far fewer having unreciprocated
 interactions of some type.
 
-\paragraph*{Clustering coefficient remains relatively stable as $n$, $k$ vary:}
+\paragraph*{Clustering coefficient remains relatively stable as $n$, $k$ vary}
 The clustering coefficient is much larger in the subgraph of reciprocated
 edges, which corresponds naturally to the notion that reciprocated 
 edges represent more social activity, with a larger density of triangles.
 The fact that these quantities are stable as we change $n$ and $k$ suggests
 that the network properties of these subgraphs do not change significantly even if we sample from a relatively smaller population of all users (Fig. \ref{fig_rur_cc_n},\ref{fig_rur_cc_k}).
 
-\paragraph*{Connected component remains stable as $n$ varies, but decreases as $k$ increases.} 
+\paragraph*{Connected component remains stable as $n$ varies, but decreases as $k$ increases} 
 The graphs corresponding to $E_k^r$ and $E_k^u$ have giant components
 for relatively low values of $k$.
 However, the size of the largest component shrinks rapidly once 
