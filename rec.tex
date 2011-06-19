@@ -638,26 +638,26 @@ All (1-4) & 0.862 & Outdegree-indegree ratio \\
 
 Table \ref{table_recresults_dtree} shows the accuracy of the trees and
 their most important attribute for the different sets of features. We
-notice that the accuracy when we only use degree/message features
+find that the accuracy when we only use degree/message features
 compared to that when we include all features is the same. And
 although we observe that the two-step paths ratio obtains an accuracy
 of 0.760 on its own while the decision tree for link prediction only
 manages 0.739, this can be attributed to the inaccuracy introduced
 splitting each continuous variable into 10 discrete portions.
-Furthemore, we notice that the features that are commonly used for
-link prediction yield a tree of lower accuracy than other features.
-This establishes a concrete sense in which 
-the problem of predicting reciprocation is quite different
-from link predictions.
+Furthemore, features commonly used for
+link prediction yield a tree of lower accuracy than other features, establishing a concrete sense in which 
+the problem of reciprocity prediction is different
+from link prediction.
 
 Whenever the outdegree-indegree value or ratio was included as an attribute, it became the most important.
 
-If we only consider $E_=$, node pairs with equal indegree ($|E_=|=16,311$), the accuracy of All ratio drops to 0.776, suggesting that predicting reciprocity here is considerably more difficult as we lose the ability to differentiate nodes of different status, or indegree. Again, the most important feature is outdegree ratio.
+If we only consider $E_=$, node pairs with equal indegree ($|E_=|=16,311$), the accuracy of All ratio drops to 0.776, suggesting that predicting reciprocity here is considerably more difficult as we lose the ability to differentiate nodes of different status, or indegree. 
+Again, the most important feature is outdegree ratio.
 
 \subsection{Regression analysis}
-We also used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$ and $z = \beta_0 + \beta F$, where $f(z)$ is binary and takes the value 1 when an edge is reciprocated, and 0 otherwise. $F$ is the vector of features.
-The results are shown in 
-tables \ref{table_recresults_logr}---\ref{table_recresults_lograll3}, where struck-out $\mathbf{p}$-values indicate insignificant features.
+We also used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$, $z = \beta_0 + \beta F$, $f(z)$ is binary (1 when an edge is reciprocated, 0 otherwise) and $F$ is the vector of features.
+The results are shown in tables \ref{table_recresults_logr}---\ref{table_recresults_lograll3}, where struck-out $\mathbf{p}$-values indicate insignificant features. 
+Here, we see that the two-step paths ($v$ to $w$), the two-step paths ratio and Jaccard (out) features are most significant even when taking into account all features at once.
 
 
 \begin{table}[!t]
@@ -766,7 +766,7 @@ Mutual Neighbors (out) &0.0050245  & $< 2 \e{-16} $\\
 Two-step paths ($v$ to $w$)  &  -0.0462950   & $< 2 \e{-16} $\\
 Two-step paths ($w$ to $v$)   &    0.0167156  & $< 2 \e{-16} $\\
 \hline
-Two-step paths (directed)  &   0.0440107 & $< 2 \e{-16} $\\
+Two-step paths ratio &   0.0440107 & $< 2 \e{-16} $\\
 Jaccard (in) & -0.0398243 & $< 2 \e{-16} $\\
 Jaccard (out) &   0.0561815  & $< 2 \e{-16} $\\
 Adamic-Adar  & 0.0111504 & $< 2 \e{-16} $ \\
