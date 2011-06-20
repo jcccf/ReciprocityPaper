@@ -193,8 +193,7 @@ unreciprocated links can easily exhibit either type of sign.
 We now formalize the problem of predicting reciprocation.
 The input to our prediction problem is a directed graph $G=(V,E)$ and a node pair $\{v,w\}$, where $v,w \in V$ but all edges between $v$ and $w$ removed. 
 We use an @-message from $v$ to $w$ as an indication of a directed
-$(v,w)$ link, rather than other indications such as the fact
-that $v$ follows $w$.
+$(v,w)$ link, rather than other indications such as following.
 This is in keeping with our focus 
 on communication activities.
 Generally, our task
@@ -204,14 +203,14 @@ First, we consider a formulation in which we decide whether a $\{v,w\}$ relation
 We make this prediction under the assumption that at least one directed edge exists between $v$ and $w$. 
 In the second formulation, we ask whether the $(w,v)$ edge is present given that the 
 $(v,w)$ edge exists.
-Intuitively, it would appear that predicting a symmetric relationship
+Intuitively, predicting a symmetric relationship
 between nodes is a more difficult task than predicting reciprocation
 in a specific direction, and we show that this is indeed the case.
 
 \subsection{Notation}
 The number of messages produced by users on 
-Twitter exhibits a long-tail distribution; many users produce only a small number of messages.
-In this work, we will focus on users who have produced 
+Twitter exhibits a long-tail distribution -- many users produce only a small number of messages.
+In this work, we focus on users who have produced 
 a large number of @-messages, so that we are studying 
 a user population for whom Twitter is a significant communication medium.
 We consider the subgraphs of the form $G_n = (V_n, E_n)$, where $V_n = \{v~|~v \in V, v \text{ sent } \ge n \text{ messages}\}$ and $E_n = \{e=(v,w)~|~e \in E,~v \text{ and } w \in V_n\}$.
@@ -234,7 +233,7 @@ The graph $G = (V,E)$ of users who authored at least one @-message
 contains 12,795,683 distinct users who sent a total 
 of 819,305,776 @-messages, with 156,868,257 distinct directed interactions. 
 
-We focus our analysis on the subgraph $G_{1000}$ induced by users who authored at least 1000 @-messages, and only consider an edge $(v,w)$ to be present if both $v$ and $w$ have authored 1000 @-messages each.
+We focus our analysis on the subgraph $G_{1000}$, induced by users who authored at least 1000 @-messages.
 In $G_{1000}$, which involves 181,033 users, we find that $|E^r_{10}| = 797,342$ and $|E^u_{10}| = 349,258$
 
 \section{Methods for Reciprocity Prediction}
@@ -244,7 +243,7 @@ Each feature corresponds to a method that assigns a value $\operatorname{val}(v,
 For each feature, we look at its value and whether the edge in question is reciprocated; this data is used for training models to predict reciprocity.
 
 Given the values corresponding to all node pairs (or nodes) in question, we can then choose threshold values or ranges where we predict reciprocity, 
-and predicting lack thereof in the complementary region.
+and predicting a lack thereof in the complementary region.
 We consider a simple threshold classification scheme which predicts that a node pair $(u,v)$ is unreciprocated if the feature value is less than (or greater than) some threshold, and is reciprocated otherwise.
 For each feature, we determine the threshold value $\operatorname{val}_{OPT}$ and threshold direction (less than / greater than) to maximize prediction accuracy according to this threshold classifier.
 For example, a sufficiently high number of mutual neighbors 
@@ -444,10 +443,11 @@ Two-step paths ratio & $\frac{|\operatorname{paths}^2(v,w)|}{|\operatorname{path
 
 \subsection{Individual properties}
 To calculate the accuracy of the individual heuristics, we calculated $\operatorname{val}$ for each feature on the subset $E_{10}^r \cup E_{10}^u$ of the graph $G_{1000}$, where equal numbers of edges were taken from the sets of reciprocated and unreciprocated edges. 
-This gives a baseline accuracy is 0.500, achievable by predicting that all edges are of one type. 
+This gives a baseline accuracy of 0.500, achievable by predicting that all edges are of one type. 
 We applied the SYM and REV mechanisms to feature sets 2-4, and REV-$v$ and REV-$w$ to set 1.
 
-We then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
+As described earlier, we then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy.
+% - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
 Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while 
 table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic.
 
@@ -535,12 +535,12 @@ REV-$v^-$ & - & - \\
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
-\caption{Reciprocity Prediction Method Performance: Individual (REV)}
+\caption{Reciprocity Prediction Feature Performance: Individual (REV)}
 \label{table_recresults_indiv}
 \centering
 \begin{tabular}{|c||c|c|}
 \hline
-\bf{Method} & $\mathbf{val}_{OPT}$ (Percentile) & \bf{Accuracy} \\
+\bf{Feature} & $\mathbf{val}_{OPT}$ (Percentile) & \bf{Accuracy} \\
 \hline
 Indegree ratio & 0.414 (46) & 0.759 \\
 Outdegree ratio & 0.667 (43) & 0.628 \\
@@ -574,12 +574,12 @@ Preferential attachment ($w$ to $v$) & 2610 (37) & 0.534* \\
 
 \begin{table}[!t]
 \renewcommand{\arraystretch}{1.3}
-\caption{Reciprocity Prediction Method Performance: Individual (REV-$v$,REV-$w$)}
+\caption{Reciprocity Prediction Feature Performance: Individual (REV-$v$,REV-$w$)}
 \label{table_recresults_indivVW}
 \centering
 \begin{tabular}{|c||c|c|}
 \hline
-\bf{Method} & $\mathbf{val}_{OPT}$ (Percentile) & \bf{Accuracy} \\
+\bf{Feature} & $\mathbf{val}_{OPT}$ (Percentile) & \bf{Accuracy} \\
 \hline
 Indegree (v) &  61 (60) & 0.582 \\
 Indegree (w) & 148 (61) & 0.731* \\
