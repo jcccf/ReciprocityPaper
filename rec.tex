@@ -123,8 +123,8 @@ We pursue two main approaches to analyzing reciprocity.
 The first is the problem of reciprocity prediction:
 we formulate several variants of the problem, all of them
 oriented around determining whether a link between users $v$ and $w$
-is reciprocated or unreciprocated.
-We identify a set of features based on the characteristics of $v$ and $w$,
+is reciprocated or unreciprocated, 
+and identify a set of features based on the characteristics of $v$ and $w$,
 and of nodes connected to $v$ and $w$, that have strong predictive
 value for this task.
 We find that differences in reciprocity can be related to the 
@@ -226,16 +226,15 @@ and the set of unreciprocated edges be denoted $E_k^u$.
 Finally, let $\deg^-(v)$ and $\deg^+(v)$ respectively denote the indegree and outdegree of node $v$, $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ be the messages received and sent by $v$, and $\Gamma^-(v) = \{w| (w,v) \in E\}$ be the set of people who send messages to $v$.
 
 \subsection{Dataset description}
-% In non-anonymous version: Cite our other paper here for details about the data collection
-We extract the \emph{@-message graph} from a large crawl of Twitter that took place between August 2009 and January 2010.
+% TODO In non-anonymous version: Cite our other paper here for details about the data collection
+We extracted the \emph{@-message graph} from a large crawl of Twitter that took place between August 2009 and January 2010.
 More than three-billion messages from over 60 million users were collected.  
 The @-message graph is constructed by looking at tweets a user $v$ authors which mention user $w$ at the beginning of the Tweet.  
 The graph $G = (V,E)$ of users who authored at least one @-message 
 contains 12,795,683 distinct users who sent a total 
 of 819,305,776 @-messages, with 156,868,257 distinct directed interactions. 
 
-We focus our analysis on the subgraph $G_{1000}$, the subgraph induced by users who authored at least 1000 @-messages. 
-Furthermore, we only consider an edge $(v,w)$ to be present if at least 10 @-messages were sent from $v$ to $w$ (in our notation, $v \xrightarrow{10} w$).
+We focus our analysis on the subgraph $G_{1000}$ induced by users who authored at least 1000 @-messages, and only consider an edge $(v,w)$ to be present if both $v$ and $w$ have authored 1000 @-messages each.
 In $G_{1000}$, which involves 181,033 users, we find that $|E^r_{10}| = 797,342$ and $|E^u_{10}| = 349,258$
 
 \section{Methods for Reciprocity Prediction}
@@ -278,7 +277,7 @@ Both relative (e.g., the ratio of indegrees) and absolute (e.g., $\deg^-(w)$) fe
 
 \item \emph{Incoming message and outgoing message ratio} are similar,
 but instead uses the total number of messages that a node receives or
-sends, regardless of which nodes messages are sent to or received from. 
+sends, regardless of which nodes messages are sent to, or received from. 
 Specifically, we use the analogous measures
 discussed just above for degree, but with 
 $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ playing
@@ -639,8 +638,7 @@ All (1-4) & 0.862 & Outdegree-indegree ratio \\
 Table \ref{table_recresults_dtree} shows the accuracy of the trees and
 their most important attribute for the different sets of features. We
 find that the accuracy when we only use degree/message features
-compared to that when we include all features is the same. And
-although we observe that the two-step paths ratio obtains an accuracy
+compared to that when we include all features is the same. While we observe that the two-step paths ratio obtains an accuracy
 of 0.760 on its own while the decision tree for link prediction only
 manages 0.739, this can be attributed to the inaccuracy introduced
 splitting each continuous variable into 10 discrete portions.
