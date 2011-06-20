@@ -23,7 +23,7 @@ Ithaca, NY 14853 \\
 jc882@cornell.edu}
 \and
 \IEEEauthorblockN{Daniel Romero}
-\IEEEauthorblockA{Computer Science\\
+\IEEEauthorblockA{Center for Applied Mathematics\\
 Cornell University \\
 Ithaca, NY 14853 \\
 dmr239@cornell.edu}
@@ -225,9 +225,7 @@ and the set of unreciprocated edges be denoted $E_k^u$.
 Finally, let $\deg^-(v)$ and $\deg^+(v)$ respectively denote the indegree and outdegree of node $v$, $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ be the messages received and sent by $v$, and $\Gamma^-(v) = \{w| (w,v) \in E\}$ be the set of people who send messages to $v$.
 
 \subsection{Dataset description}
-% TODO In non-anonymous version: Cite our other paper here for details about the data collection
-We extracted the \emph{@-message graph} from a large crawl of Twitter that took place between August 2009 and January 2010.
-More than three-billion messages from over 60 million users were collected.  
+We extracted the \emph{@-message graph} from a large crawl of Twitter that took place between August 2009 and January 2010, and more than three-billion messages from over 60 million users were collected \cite{Romero:2011:DMI:1963405.1963503}.
 The @-message graph is constructed by looking at tweets a user $v$ authors which mention user $w$ at the beginning of the Tweet.  
 The graph $G = (V,E)$ of users who authored at least one @-message 
 contains 12,795,683 distinct users who sent a total 
@@ -276,7 +274,7 @@ Both relative (e.g., the ratio of indegrees) and absolute (e.g., $\deg^-(w)$) fe
 
 \item \emph{Incoming message and outgoing message ratio} are similar,
 but instead uses the total number of messages that a node receives or
-sends, regardless of which nodes messages are sent to, or received from. 
+sends, regardless of the nodes to which messages are sent, or from which messages are received.
 Specifically, we use the analogous measures
 discussed just above for degree, but with 
 $\operatorname{msg}^-(v)$ and $\operatorname{msg}^+(v)$ playing
@@ -446,8 +444,7 @@ To calculate the accuracy of the individual heuristics, we calculated $\operator
 This gives a baseline accuracy of 0.500, achievable by predicting that all edges are of one type. 
 We applied the SYM and REV mechanisms to feature sets 2-4, and REV-$v$ and REV-$w$ to set 1.
 
-As described earlier, we then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy.
-% - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
+As described earlier, we then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
 Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while 
 table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic.
 
@@ -812,14 +809,14 @@ The clustering coefficient is much larger in the subgraph of reciprocated
 edges, which corresponds naturally to the notion that reciprocated 
 edges represent more social activity, with a larger density of triangles.
 The fact that these quantities are stable as we change $n$ and $k$ suggests
-that the network properties of these subgraphs do not change significantly even if we sample from a relatively smaller population of all users (Fig. \ref{fig_rur_cc_n},\ref{fig_rur_cc_k}).
+that the network properties of these subgraphs do not change significantly even if we sample from a relatively smaller population of all users (Fig. \ref{fig_rur_cc}).
 
 \paragraph*{Connected component remains stable as $n$ varies, but decreases as $k$ increases} 
 The graphs corresponding to $E_k^r$ and $E_k^u$ have giant components
 for relatively low values of $k$.
 However, the size of the largest component shrinks rapidly once 
 $k$ passes a particular range (roughly between 50 and 100).
-(Fig. \ref{fig_rur_lcc_n},\ref{fig_rur_lcc_k}).
+(Fig. \ref{fig_rur_lcc}).
 This hints at a kind of qualitative transition in the structure of the
 network as a function of message volume, with the edges representing 
 more than 100 communications each being unable to sustain a very large
@@ -827,57 +824,65 @@ component on their own.
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=2.5in]{proportion_edgesnodes_n}                
+\includegraphics[width=3.2in]{proportion_edgesnodes_n}                
 \caption{Proportion of nodes or edges (varying $n$)}
 \label{fig_rur_propn}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=2.5in]{proportion_edgesnodes_k}                
+\includegraphics[width=3.2in]{proportion_edgesnodes_k}                
 \caption{Proportion of nodes or edges (varying $k$)}
 \label{fig_rur_propk}
 \end{figure}
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=2.5in]{average_clustering_n}          
-\caption{Clustering coefficient (varying $n$)}
-\label{fig_rur_cc_n}
-\end{figure}
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=2.5in]{average_clustering_k}      
-\caption{Clustering coefficient (varying $k$)}
-\label{fig_rur_cc_k}
-\end{figure}
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=2.5in]{proportion_largestcc_n}
-\caption{Proportion in largest connected component (varying $n$)}
-\label{fig_rur_lcc_n}
-\end{figure}
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=2.5in]{proportion_largestcc_k}
-\caption{Proportion in largest connected component (varying $k$)}
-\label{fig_rur_lcc_k}
-\end{figure}
-
 %\begin{figure}[!t]
 %\centering
-%\subfloat[Varying $n$]{\includegraphics[width=1.5in]{proportion_largestcc_n}}                
-%\subfloat[Varying $k$]{\includegraphics[width=1.5in]{proportion_largestcc_k}}
-%\caption{Proportion in largest connected component}
-%\label{fig_rur_lcc}
+%\includegraphics[width=2.5in]{average_clustering_n}          
+%\caption{Clustering coefficient (varying $n$)}
+%\label{fig_rur_cc_n}
+%\end{figure}
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=2.5in]{average_clustering_k}      
+%\caption{Clustering coefficient (varying $k$)}
+%\label{fig_rur_cc_k}
 %\end{figure}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=2.5in]{scatter3}
+\subfloat[Varying $n$]{\includegraphics[width=1.8in]{average_clustering_n}}                
+\subfloat[Varying $k$]{\includegraphics[width=1.8in]{average_clustering_k}}
+\caption{Clustering coefficient}
+\label{fig_rur_cc}
+\end{figure}
+
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=2.5in]{proportion_largestcc_n}
+%\caption{Proportion in largest connected component (varying $n$)}
+%\label{fig_rur_lcc_n}
+%\end{figure}
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=2.5in]{proportion_largestcc_k}
+%\caption{Proportion in largest connected component (varying $k$)}
+%\label{fig_rur_lcc_k}
+%\end{figure}
+
+\begin{figure}[!t]
+\centering
+\subfloat[Varying $n$]{\includegraphics[width=1.8in]{proportion_largestcc_n}}                
+\subfloat[Varying $k$]{\includegraphics[width=1.8in]{proportion_largestcc_k}}
+\caption{Proportion in largest connected component}
+\label{fig_rur_lcc}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=3.4in]{scatter3}
 \caption{Scatter plot of users' interaction types}
 \label{fig_rur_sca2}
 \end{figure}
@@ -934,8 +939,8 @@ dimensions along which to express this heterogeneity is an
 important question as well.
 
 
-% \section*{Acknowledgment}
- % This work was supported by (SOMEGRANT).
+ \section*{Acknowledgment}
+This work was supported in part by a Google Research Grant, a Yahoo!~Research Alliance Grant, and NSF grants IIS-0910664, CCF-0910940, and IIS-1016099. 
 
 
 \bibliographystyle{IEEEtran}
