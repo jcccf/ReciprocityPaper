@@ -73,12 +73,13 @@ of network links.
 
 \section{Introduction}
 
-As social media applications become richer and more complex,
-they come to contain a wide range of different types of 
+As social media applications gain richer sets of features,
+they come to contain increasingly diverse 
 connections among their users.
-An important source of variation is exhibited by the
-microblogging site Twitter, where communication links
-(for our purposes, messages called @-messages which are directed from one user to another)
+The microblogging site Twitter is one example in which users share
+links to content, repeat messages, broadcast messages messages with an 
+intended target.  These directed messages, which we call \emph{@-messages}, 
+signal a communication link between two users and 
 can represent many different forms of interaction.
 Indeed, earlier research has shown that Twitter contains
 a large amount of social activity between users who interact
@@ -86,31 +87,30 @@ with each other as peers, and also a large amount of information-seeking
 and information-sharing activity in which users interact with
 celebrities, news sources, and other types of high-visibility accounts
 \cite{kwak-what-is-twitter,romero-directed-closure}.
+% The ICWSM paper of ours seems to also deal with characterizing the interaction
+% between users.
 
 A challenge when studying an environment such as Twitter
-is that all of these types of connections are superimposed 
+is that these types of connections are superimposed 
 in a single communication network.
-Therefore, it is important to develop techniques capable of dissecting
-the links of the underlying network into these fundamentally
-different forms of activity.
-We develop a set of techniques for this purpose
-by formulating and studying the problem of predicting
-{\em reciprocity} in linking.
+Therefore, it is important to develop techniques capable of identifying 
+the links of the underlying network correspond with these fundamentally different activities .
+To this end, we formulate the problem of predicting
+{\em link reciprocity}, and develop a set of techniques for this purpose.
 
 Reciprocity captures a basic way in which different forms of
 interaction on a site like Twitter take place.
 When two users $v$ and $w$ interact as peers, one expects that @-messages
-will flow in each direction between them --- we consider
+will be exchanged between them --- we consider
 this to be a {\em symmetric}, or {\em reciprocal}, interaction.
 On the other hand, if a user $v$ sends multiple messages to a
-celebrity or news source $w$, it is likely that $w$ will never
+celebrity or news source $w$, it is likely that $w$ will not
 send messages in return --- this is an
 {\em asymmetric}, or {\em unreciprocated} interaction.
-What characterizes the difference between reciprocated and
+Which features characterize the difference between reciprocal and
 unreciprocated relationships?  Can we tell them apart based on
-characteristics of the users involved, and their neighborhoods
-in the network?
-Do the sub-networks of reciprocated and unreciprocated links have
+properties of the users involved, and users their network neighborhoods?
+Do the sub-networks of reciprocal and unreciprocated links have
 different structural properties?
 These are some of the questions we address in this paper, as an
 approach for addressing the broader issue of isolating the different
@@ -120,58 +120,59 @@ site such as Twitter.
 \subsection{Summary of Results}
 
 We pursue two main approaches to analyzing reciprocity.
-The first is the problem of reciprocity prediction:
+The first is to study the problem of reciprocity prediction:
 we formulate several variants of the problem, all of them
 oriented around determining whether a link between users $v$ and $w$
-is reciprocated or unreciprocated, 
-and identify a set of features based on the characteristics of $v$ and $w$,
-and of nodes connected to $v$ and $w$, that have strong predictive
-value for this task.
+is reciprocal or unreciprocated, 
+and identify a set of features based on the characteristics of $v$, $w$,
+and any nodes connected to $v$ or $w$.  
+Our analysis extracts features that have strong predictive
+power for this task.
 We find that differences in reciprocity can be related to the 
 notion of status.
 Roughly speaking, people with similar status often participate in reciprocal
 interactions (e.g. messages between friends), while those with
-dissimilar status often participate in unreciprocated interactions (e.g.
+disparate status often participate in unreciprocated interactions (e.g.
 messages from fans to celebrities).
-In particular, we find that measures formalizing the 
+In particular, we find that measures that formalize the 
 relative ``flow'' of links from $v$ to $w$,
 compared with the corresponding flow from $w$ to $v$, constitute
 an important source of information for this task.
 
-The second main issue we consider is the structural comparison
-of the subgraphs consisting entirely of reciprocated links and
+Our second approach involves comparing the structure of two subgraphs, 
+one that consists entirely of reciprocal links and the other
 entirely of unreciprocated links.
-We find that they exhibit important differences, including 
+We find that these structures exhibit important differences, including 
 greater clustering and a larger giant component in the
-subgraph of reciprocated links.
+subgraph of symmetric links.
 Moreover, we find that almost all highly active Twitter users
-take part in at least some reciprocated interactions, 
+take part in at least some reciprocal interactions, 
 while a non-trivial fraction take part in no unreciprocated interactions.
 
 \subsection{Related work}
 
 As noted above, several recent papers have discussed the 
 heterogeneity of relationship types on Twitter,
-though without consider reciprocity as a measure
+although they do not consider reciprocity as a measure
 \cite{kwak-what-is-twitter,romero-directed-closure}.
-In the context of email, Tyler and Tang considered the dynamics
+In the context of email Tyler and Tang considered the dynamics
 of replying in email, which is the analogue of reciprocation
-in that domain \cite{Tyler:2003tq}; the specifics of their
+in that domain \cite{Tyler:2003tq}; however, the specifics of their
 analysis are quite different from what we pursue here.
 
-Reciprocity prediction is related to other predictive tasks
-concerned with the links of a network, though it is different in
-important ways.
+Predicting reciprocity is related to other predictive tasks
+concerned with the links of in network but is different in several
+important aspects.
 Specifically, the {\em link prediction problem} seeks to identify
-links $(v,w)$ that are currently not present in a network snapshot,
-but which are likely to form in the near future
+links $(v,w)$ that are currently missing in a network snapshot
+but are likely to form in the near future
 \cite{liben-nowell-link-pred}.
 A key contrast between reciprocity prediction and link prediction
 is that the formation of any particular link is a rare event,
-whereas the reciprocation of an existing link $(v,w)$ by
-the reverse edge $(w,v)$ is quite common on sites such as Twitter.
-For this and other reasons, we see in our analysis that the
-types of features that have been found to work well for link 
+whereas reciprocating an existing link $(v,w)$ with
+the reverse edge $(w,v)$ is common on sites such as Twitter.
+For this and other reasons, we find in our analysis that features 
+that have been found to work well for link 
 prediction are not the most effective for reciprocity prediction.
 
 There has also been recent research predicting the 
