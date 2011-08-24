@@ -650,6 +650,15 @@ Whenever the outdegree-indegree value or ratio was included as an attribute, it 
 If we only consider $E_=$, node pairs with equal indegree ($|E_=|=16,311$), the accuracy of All ratio drops to 0.776, suggesting that predicting reciprocity here is considerably more difficult as we lose the ability to differentiate nodes of different status, or indegree. 
 Again, as the indegree of $v$ was equal to that of $w$ in every node pair $(v,w)$, the fact that the most important feature here is outdegree ratio is unsurprising.
 
+\subsubsection{Performance}
+Classifying features on their computation time, two-step hop and link prediction features (excluding preferential attachment) take more than two orders of magnitude longer to compute than all other features (500 times as long for $k=10$).
+If we only use the other features in prediction, we still obtain an accuracy of 0.862, similar to what we obtained above when we used all features.
+In practical use, it appears sufficient to only use these 
+
+\subsubsection{Effect of $k$ on accuracy}
+As $k$ increases, the proportion of edges that are defined as reciprocated increases, and naturally accuracy also increases (0.8818 for $k=20$ and 0.9032 for $k=50$).
+If we instead take equal numbers of reciprocated and unreciprocated edges, giving a baseline accuracy of 0.500, accuracy gradually increases from 0.836 for $k=10$ to 0.846 for $k=30$.
+
 \subsection{Regression analysis}
 We also used a logistic regression model on subsets of features as well, where $f(z) = \frac{e^z}{e^z+1}$, $z = \beta_0 + \beta F$, $f(z)$ is binary (1 when an edge is reciprocated, 0 otherwise) and $F$ is the vector of features.
 The results are shown in tables \ref{table_recresults_logr}---\ref{table_recresults_lograll3}, where struck-out $\mathbf{p}$-values indicate insignificant features. 
