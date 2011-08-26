@@ -274,7 +274,7 @@ Both relative (e.g., the ratio of indegrees) and absolute (e.g., $\deg^-(w)$) fe
 \item \emph{Indegree and outdegree ratio} both measure the ratio of outdegrees or indegrees of two nodes, and we define $\operatorname{val}(v,w) = \deg^-(v)/\deg^-(w)$ or $\deg^+(v)/\deg^+(w)$, respectively.
 
 \item \emph{Incoming message and outgoing message ratio} are similar,
-but instead uses the total number of messages that a node receives or
+but uses the total number of messages that a node receives or
 sends, regardless of the nodes to which messages are sent, or from which messages are received.
 Specifically, we use the analogous measures
 discussed just above for degree, but with 
@@ -295,7 +295,7 @@ Given a pair of nodes, we can compute the outdegree/indegree ratio as $\operator
 \subsection{Link prediction features}
 
 It is not intuitive whether methods that work well for link prediction would work well in predicting reciprocity. 
-While link prediction asks whether an edge could exist between two nodes, reciprocity prediction asks whether a known directed-edge is actually bidirectional.
+While link prediction asks whether an edge between two nodes exists, reciprocity prediction asks whether a known directed-edge is actually bidirectional.
 The following are some measures used in the link-prediction task:
 
 \emph{Newman} \cite{graph:common-neighbors} showed that the number of common neighbors in a collaboration network can be a predictor of future links. \emph{Mutual neighbors} calculates the number of people to whom both $v$ and $w$ send messages ($|\Gamma^+(v) \cap \Gamma^+(w)|$), or the number of people from whom both $v$ and $w$ receive messages ($|\Gamma^-(v) \cap \Gamma^-(w)|$).
@@ -445,7 +445,7 @@ To calculate the accuracy of the individual heuristics, we calculated $\operator
 This gives a baseline accuracy of 0.500, achievable by predicting that all edges are of one type. 
 We applied the SYM and REV mechanisms to feature sets 2-4, and REV-$v$ and REV-$w$ to set 1.
 
-As described earlier, we then picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
+As described earlier, we picked a threshold value $\operatorname{val}_{OPT}$ to optimize prediction accuracy - we predicted reciprocity above the threshold, and non-reciprocity below (or vice versa depending on which performed better). 
 Tables \ref{table_recresults_indiv} and \ref{table_recresults_indivVW} summarize the performance of each heuristic on the subgraph $G_{1000}, k=10$, while 
 table \ref{table_recresults_indeg} summarizes the different mechanisms of prediction for a single heuristic.
 
@@ -468,10 +468,7 @@ On the whole, outdegree-indegree ratio and the two-step paths ratio are the best
 In fact, outdegree-indegree ratio alone already achieves accuracy to within $\pm 5\%$ of a decision tree using every feature.
 
 \paragraph{Sending and receiving}
-When we look at features using one of the four mechanisms, the larger the value, the more likely it is for reciprocation to occur, and this is the case for a majority of features. 
-For example, the \emph{larger} the indegree ratio, the more in-links $v$ has in relation to $w$, increasing the probability that $w$ will link to $v$, given that we know that $v$ already links to $w$.
-
-However, the \emph{smaller} the outdegree-indegree ratio, the more likely reciprocation occurs. 
+When we look at features using one of the four mechanisms, we find that for the majority of the features, the larger the value, the more likely it is for reciprocation to occur.  However, the \emph{smaller} the outdegree-indegree ratio, the more likely reciprocation occurs. 
 In other words, a large denominator and small numerator in $\frac{\deg^+(v)}{\deg^-(v)} / \frac{\deg^+(w)}{\deg^-(w)} = \frac{\deg^+(v)\deg^-(w)}{\deg^-(v)\deg^+(w)}$ is a good indicator of reciprocation. A large denominator and small numerator indicate that $v$ has many in-links and few out-links and that $w$ has many out-links and few in-links. This suggests that $v$ has higher ``status" than $w$ and hence increases the probability that $w$ links to $v$.
 
 Interestingly, separating the numerator and denominator from the
@@ -492,10 +489,9 @@ random process. The fact that a small numerator is more important than
 a large denominator suggests that status (measured by the number of in
 and out links) is a very powerful predictor for reciprocity.
 
-If we only consider edges $E_= = \{(v,w)~|~\deg^-(v) = \deg^-(w)\}$, or that both nodes in every node pair have equal indegree, the accuracy of the outdegree ratio feature rises to 0.811. This result is comparable to what we get for the outdegree-indegree ratio feature, which is unsurprising as that reduces to outdegree ratio with equal indegree. 
-
+If we only consider edges $E_= = \{(v,w)~|~\deg^-(v) = \deg^-(w)\}$, edges connecting nodes of equal degree, the accuracy of the outdegree ratio feature rises to 0.811. This result is comparable to what we get for the outdegree-indegree ratio feature.
 \paragraph{REV-$v$ vs. REV-$w$}
-Not surprisingly, REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, 
+REV-$w$ performs better than REV-$v$ on almost all features, and where REV-$v$ performs better, 
 the difference is not as significant.
 The fact that information about $w$ is more useful than information
 about $v$ forms a suggestive contrast for various domains of
@@ -602,7 +598,7 @@ Outdegree-indegree (w) & 0.747 (50) & 0.777 \\
 
 \subsection{Decision tree analysis}
 
-We then combined subsets of features and evaluated their performance by splitting the edges in $E^r_{10} \cup E_{10}^u$ randomly into two sets and performing 2-fold cross-validation. The ID3 algorithm was used, and because $\operatorname{val}$ is continuous, we split each into deciles (dividing the data equally into tenths) to reduce computation time.
+We combined subsets of features and evaluated their performance by randomly splitting the edges in $E^r_{10} \cup E_{10}^u$ into two sets and performing 2-fold cross-validation. The ID3 algorithm was used, and because $\operatorname{val}$ is continuous, we split each into deciles (dividing the data equally into tenths) to reduce computation time.
 
 The following combined subsets, in addition to each individual subset, were considered:
 \begin{enumerate}
