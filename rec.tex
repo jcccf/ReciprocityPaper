@@ -315,7 +315,7 @@ Notice that taking the ratio of these two values is equivalent to the outdegree/
 
 \emph{Two-step paths (ratio)} is a simplification of Katz's \cite{Katz:1953un} measure of status by calculating the number of paths between two nodes. 
 In this work, we only consider paths of length 2, and define $\operatorname{val}(v,w) = |\operatorname{paths}^2(v,w)|$, where $\operatorname{paths}^2(v,w)$ is the set of paths from $v$ to $w$ of length $2$. 
-The two-step paths ratio is simply the ratio of number of [DIRECTED OR UNDIRECTED?] two-step paths from $v$ to $w$ to that from $w$ to $v$. 
+The two-step paths ratio is simply the ratio of number of directed two-step paths from $v$ to $w$ to that from $w$ to $v$. 
 
 
 \subsection{Different sets of features}
@@ -638,7 +638,7 @@ the most important attribute for the different sets of features. We
 find that using only degree/message features (set 1)
 performs as well as using all absolute features (sets 1, 3, 4). 
 The two-step paths ratio alone obtains an accuracy
-of 0.760 [CHECK THIS NUMBER- doesn't agree with table], while the decision tree for link prediction only
+of 0.760, while the decision tree for link prediction only
 manages 0.739. This can be attributed to inaccuracies introduced
 while quantizing the continuous features.
 Furthermore, features commonly used for
